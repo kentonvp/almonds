@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "almonds"
+version = "0.1.0"
+description = ""
+authors = ["Kenton Van Peursem <kentonvanp@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+textual = "^0.30.0"
+websockets = "^11.0.3"
+httpx = "^0.24.1"
+kafka-python = "^2.0.2"
+plaid-python = "^15.1.0"
+rich = "^13.4.2"
+selenium = "^4.10.0"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.7.0"
+pytest = "^7.4.0"
+textual-dev = "^1.0.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
