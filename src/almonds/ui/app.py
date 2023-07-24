@@ -1,8 +1,12 @@
+from almonds.ui.transactions import (
+    TransactionContainer,
+    NewTransactionScreen,
+    Transaction,
+)
+
 from textual.app import App, ComposeResult
-from textual.containers import Horizontal, Vertical
-from textual.geometry import Size
 from textual.screen import Screen
-from textual.widgets import Placeholder
+from textual.widgets import Placeholder, Footer
 
 
 class Header(Placeholder):
@@ -10,15 +14,6 @@ class Header(Placeholder):
     Header {
         height: 3;
         dock: top;
-    }
-    """
-
-
-class Footer(Placeholder):
-    DEFAULT_CSS = """
-    Footer {
-        height: 1;
-        dock: bottom;
     }
     """
 
@@ -44,19 +39,6 @@ class BudgetContainer(Placeholder):
             yield Item(id="budget" + str(i))
 
 
-class TransactionContainer(Placeholder):
-    DEFAULT_CSS = """
-    TransactionContainer {
-        row-span: 3;
-        column-span: 1;
-    }
-    """
-
-    def compose(self) -> ComposeResult:
-        for i in range(5):
-            yield Item(id="transaction" + str(i))
-
-
 class SavingsContainer(Placeholder):
     DEFAULT_CSS = """
     SavingsContainer {
@@ -70,11 +52,11 @@ class HomeScreen(Screen):
     def __init__(self):
         super().__init__()
         self._focus_index = 0
-        self._cycle_order = ['Budgets', 'Transactions', 'Savings']
+        self._cycle_order = ["Budgets", "Transactions", "Savings"]
 
     def compose(self) -> ComposeResult:
         yield Header(id="Header")
-        yield Footer(id="Footer")
+        yield Footer()
         yield BudgetContainer(id="Budgets")
         yield TransactionContainer(id="Transactions")
         yield SavingsContainer(id="Savings")
@@ -99,6 +81,7 @@ class HomeScreen(Screen):
         print(f"Rotate focus: {self._cycle_order[self._focus_index]}")
         self.border_focus()
 
+
 class HelpContainer(Placeholder):
     DEFAULT_CSS = """
     HelpContainer {
@@ -118,44 +101,12 @@ class HelpScreen(Screen):
     }
     """
     BINDINGS = [
-        ("question_mark", "app.pop_screen", "Pop screen"),
-        ("escape", "app.pop_screen", "Pop screen"),
+        ("question_mark", "app.pop_screen", "Exit"),
+        ("escape", "app.pop_screen", "Exit"),
     ]
 
     def compose(self) -> ComposeResult:
         yield HelpContainer(id="Help")
-
-
-class NewTransactionContainer(Placeholder):
-    DEFAULT_CSS = """
-    NewTransactionContainer {
-        height: 4;
-        width: 60%;
-        content-align: center middle;
-        background: red 20%;
-    }
-    """
-
-class NewTransactionScreen(Screen[bool]):
-    DEFAULT_CSS = """
-    NewTransactionScreen {
-        align: center middle;
-        background: rgba(12, 30, 46, 0.5);
-    }
-    """
-    BINDINGS = [
-        ("escape", "cancel_transaction", "Pop screen"),
-        ("enter", "add_transaction", "Add transaction item"),
-    ]
-    def compose(self) -> ComposeResult:
-        yield NewTransactionContainer(id="NewTransaction")
-
-    def action_cancel_transaction(self) -> None:
-        self.dismiss(False)
-
-    def action_add_transaction(self) -> None:
-        print("Add transaction item")
-        self.dismiss(True)
 
 
 class NewBudgetContainer(Placeholder):
@@ -168,6 +119,7 @@ class NewBudgetContainer(Placeholder):
     }
     """
 
+
 class NewBudgetScreen(Screen[bool]):
     DEFAULT_CSS = """
     NewBudgetScreen {
@@ -176,9 +128,10 @@ class NewBudgetScreen(Screen[bool]):
     }
     """
     BINDINGS = [
-        ("escape", "cancel_budget", "Pop screen"),
-        ("enter", "add_budget", "Add budget item"),
+        ("escape", "cancel_budget", "Cancel"),
+        ("enter", "add_budget", "Add budget"),
     ]
+
     def compose(self) -> ComposeResult:
         yield NewBudgetContainer(id="NewBudget")
 
@@ -194,16 +147,16 @@ class AlmondsApp(App):
     SCREENS = {
         "home": HomeScreen(),
         "help": HelpScreen(),
-        'new_transaction': NewTransactionScreen(),
-        'new_budget': NewBudgetScreen()
+        "new_transaction": NewTransactionScreen(),
+        "new_budget": NewBudgetScreen(),
     }
     BINDINGS = [
         ("question_mark", "display_help", "Help"),
-        ("t", "new_transaction", "Add a transaction"),
-        ("b", "new_budget", "Add a budget category"),
-        ("h", "cycle_left", "Cycle left"),
-        ("l", "cycle_right", "Cycle right"),
-        ("a", "add_focused", "Add focused"),
+        ("t", "new_transaction", "Add Transaction"),
+        ("b", "new_budget", "Add Budget"),
+        ("h", "cycle_left", "Cycle Left"),
+        ("l", "cycle_right", "Cycle Right"),
+        ("enter", "add_focused", "Add Focused"),
     ]
 
     def on_mount(self) -> None:
@@ -213,28 +166,31 @@ class AlmondsApp(App):
         self.push_screen("help")
 
     def action_new_transaction(self) -> None:
-        def process_result(result) -> None:
-            print(f"Process transaction: {result}")
+        def process_result(result: Transaction | None) -> None:
+            print(f"Add transaction: {result}")
+
         self.push_screen("new_transaction", process_result)
 
     def action_new_budget(self) -> None:
+        # TODO: add Budget type
         def process_result(result) -> None:
             print(f"Process budget: {result}")
+
         self.push_screen("new_budget", process_result)
 
     def action_add_focused(self) -> None:
-        if self.SCREENS['home']._focus_index == 0:
+        if self.SCREENS["home"]._focus_index == 0:
             self.action_new_budget()
-        elif self.SCREENS['home']._focus_index == 1:
+        elif self.SCREENS["home"]._focus_index == 1:
             self.action_new_transaction()
         else:
             print("Add savings not implemented")
 
     def action_cycle_left(self) -> None:
-        self.SCREENS['home'].rotate_focus_left()
+        self.SCREENS["home"].rotate_focus_left()
 
     def action_cycle_right(self) -> None:
-        self.SCREENS['home'].rotate_focus_right()
+        self.SCREENS["home"].rotate_focus_right()
 
 
 if __name__ == "__main__":
