@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "almonds"
+version = "0.1.0"
+description = ""
+authors = ["kentonvp <kentonvanp@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+Flask = "^3.0.3"
+sqlalchemy = "^2.0.31"
+pydantic = "^2.7.4"
+isort = "^5.13.2"
+email-validator = "^2.2.0"
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.4.2"
+pytest = "^8.2.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

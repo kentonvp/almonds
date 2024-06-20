@@ -1,0 +1,16 @@
+<form action="{{ url_for('login.login')}}" method="POST">
+    <div>
+        <label for="username">email: </label >
+        <input id="username" name="username" type="text"/>
+
+        <label for="password">password: </label >
+        <input id="password" name="password" type="password"/>
+    </div>
+    <button>Login</button>
+</form >
+
+<p>or</p>
+
+<a href="{{ url_for('login.create_user') }}">
+    <button>Create Account</button>
+</a>

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Almonds Dashboard - {% block title %}{% endblock title %}</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+  </head>
+  <body>
+    {% include("_navigation.html") %}
+
+    {% block header %} {% endblock header %}
+
+    <section>
+      {% block errors %}
+      {% if error_msg is defined %}
+        <p id="error-message">{{ error_msg }}</p>
+      {% endif %}
+      {% endblock errors%}
+      <main>
+        {% block content %}
+        {% endblock content %}
+      </main>
+    </section>
+  </body>
+</html>
