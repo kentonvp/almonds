@@ -1,0 +1,48 @@
+{% block head_scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
+<script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+<script>
+  (async ($) => {
+    // Grab a Link token to initialize Link
+    const createLinkToken = async () => {
+      const res = await fetch("{{ url_for('plaid.create_link_token') }}");
+      const data = await res.json();
+      const linkToken = data.link_token;
+      localStorage.setItem("link_token", linkToken);
+      return linkToken;
+    };
+
+    // Initialize Link
+    const handler = Plaid.create({
+      token: await createLinkToken(),
+      onSuccess: async (publicToken, metadata) => {
+        await fetch("{{ url_for('plaid.exchange_public_token') }}", {
+          method: "POST",
+          body: JSON.stringify({ public_token: publicToken }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        window.location.href = "{{ url_for('root.view') }}";
+      },
+      onEvent: (eventName, metadata) => {
+        console.log("Event:", eventName);
+        console.log("Metadata:", metadata);
+      },
+      onExit: (error, metadata) => {
+        console.log(error, metadata);
+      },
+    });
+
+    // Start Link when button is clicked
+    const linkAccountButton = document.getElementById("link-account");
+    linkAccountButton.addEventListener("click", (event) => {
+      handler.open();
+    });
+  })(jQuery);
+</script>
+{% endblock head_scripts %} {% block content %}
+<button id="link-account">
+  <strong>Link account</strong>
+</button>
+{% endblock content %}

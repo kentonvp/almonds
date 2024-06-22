@@ -1,16 +1,32 @@
-<form action="{{ url_for('login.login')}}" method="POST">
-    <div>
-        <label for="username">email: </label >
-        <input id="username" name="username" type="text"/>
+<div
+  class="container-fluid min-vh-100 d-flex justify-content-center align-items-center bg-light"
+>
+  <div class="card p-4 shadow-sm bg-white">
+    <form action="{{ url_for('login.login')}}" method="POST">
+      <div class="form-floating mb-3">
+        <input id="username" name="username" class="form-control" required />
+        <label for="username">Username</label>
+      </div>
+      <div class="form-floating mb-3">
+        <input
+          id="password"
+          name="password"
+          type="password"
+          class="form-control"
+          required
+        />
+        <label for="password">Password</label>
+      </div>
+      <button type="submit" class="btn btn-primary w-100 mb-3">Login</button>
+    </form>
 
-        <label for="password">password: </label >
-        <input id="password" name="password" type="password"/>
-    </div>
-    <button>Login</button>
-</form >
+    <p class="text-center mb-3">or</p>
 
-<p>or</p>
-
-<a href="{{ url_for('login.create_user') }}">
-    <button>Create Account</button>
-</a>
+    <a
+      href="{{ url_for('login.create_user') }}"
+      class="btn btn-outline-secondary w-100"
+    >
+      Create Account
+    </a>
+  </div>
+</div>

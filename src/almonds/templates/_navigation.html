@@ -1,3 +1,51 @@
-<nav>
-    <a href="{{ url_for('home.view') }}">Almonds</a>
+<nav class="navbar navbar-expand-lg">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="{{ url_for('root.view') }}">
+      <img
+        src="{{ url_for('static', filename='almond-icon.svg') }}"
+        alt="Logo"
+        width="30"
+        height="24"
+        class="d-inline-block align-text-top"
+      />
+      Almonds
+    </a>
+    {% if username is defined %}
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a
+          class="nav-link {{'active' if current_page == 'transactions' else ''}}"
+          href="{{ url_for('root.transactions', page=1) }}"
+          >Transactions</a
+        >
+      </li>
+      <li class="nav-item">
+        <a
+          class="nav-link {{'active' if current_page == 'budget' else ''}}"
+          href="{{ url_for('root.budget') }}"
+          >Budget</a
+        >
+      </li>
+      <li class="nav-item">
+        <a
+          class="nav-link {{'active' if current_page == 'goals' else ''}}"
+          href="{{ url_for('root.goals') }}"
+          >Goals</a
+        >
+      </li>
+      <li class="nav-item">
+        <a
+          class="nav-link {{'active' if current_page == 'settings' else ''}}"
+          href="{{ url_for('root.settings') }}"
+          >Settings</a
+        >
+      </li>
+      <li class="nav-item">
+        <form action="{{ url_for('login.logout') }}" method="POST">
+          <button type="submit" class="nav-link">Logout</button>
+        </form>
+      </li>
+    </ul>
+    {% endif %}
+  </div>
 </nav>

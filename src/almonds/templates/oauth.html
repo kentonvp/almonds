@@ -1,0 +1,33 @@
+{% extends("base.html") %} {% block head_scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
+{% endblock head_scripts %} {% block body_scripts %}
+<script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+<script>
+  (($) => {
+    const linkToken = localStorage.getItem("link_token");
+
+    const handler = Plaid.create({
+      token: linkToken,
+      receivedRedirectUri: window.location.href,
+      onSuccess: async (publicToken, metadata) => {
+        await fetch("{{ url_for('plaid.exchange_public_token') }}", {
+          method: "POST",
+          body: JSON.stringify({ public_token: publicToken }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        window.location.href = "{{ url_for('root.view') }}";
+      },
+      onEvent: (eventName, metadata) => {
+        console.log("Event:", eventName);
+        console.log("Metadata:", metadata);
+      },
+      onExit: (error, metadata) => {
+        console.log(error, metadata);
+      },
+    });
+    handler.open();
+  })(jQuery);
+</script>
+{% endblock body_scripts %}

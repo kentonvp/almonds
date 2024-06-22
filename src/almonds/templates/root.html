@@ -1,0 +1,173 @@
+{% extends 'base.html' %} {% block head_scripts %} {% endblock head_scripts%} {%
+block header %} {% endblock header %} {% block content %}
+<div class="container mt-4">
+  <h1 class="mb-4">
+    Welcome back, <span class="fw-bold text-capitalize">{{ username }}</span>!
+  </h1>
+  <div class="row">
+    <div class="col-md-6 col-lg-3 mb-4">
+      <div class="card bg-success text-white">
+        <div class="card-body">
+          <h5 class="card-title">Total Balance</h5>
+          <p class="card-text display-6">
+            {{ user.total_balance | format_currency }}
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-3 mb-4">
+      <div class="card bg-info text-white">
+        <div class="card-body">
+          <h5 class="card-title">Income This Month</h5>
+          <p class="card-text display-6">
+            {{ user.income_this_month | format_currency }}
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-3 mb-4">
+      <div class="card bg-warning text-dark">
+        <div class="card-body">
+          <h5 class="card-title">Expenses This Month</h5>
+          <p class="card-text display-6">
+            {{ user.expenses_this_month | format_currency }}
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-3 mb-4">
+      <div class="card bg-danger text-white">
+        <div class="card-body">
+          <h5 class="card-title">Savings Goal Progress</h5>
+          <p class="card-text display-6">{{ user.savings_goal_progress }}%</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-8 mb-4">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Spending Overview</h5>
+        </div>
+        <div class="card-body">
+          <div id="spendingChart">{{ spending_chart | safe }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4 mb-4">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Top Expenses</h5>
+        </div>
+        <ul class="list-group list-group-flush">
+          {% for expense in top_expenses %}
+          <li
+            class="list-group-item d-flex justify-content-between align-items-center"
+          >
+            {{ expense.category }}
+            <span class="badge bg-primary rounded-pill"
+              >{{ expense.amount | format_currency }}</span
+            >
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6 mb-4">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Recent Transactions</h5>
+        </div>
+        <ul class="list-group list-group-flush">
+          {% for transaction in recent_transactions %}
+          <li class="list-group-item">
+            <div class="d-flex justify-content-between">
+              <div>
+                <h6 class="mb-0">{{ transaction.description }}</h6>
+                <small class="text-muted"
+                  >{{ transaction.date | format_date }}</small
+                >
+              </div>
+              <span
+                class="{{ 'text-success' if transaction.amount > 0 else 'text-danger' }}"
+                >{{ transaction.amount | format_currency }}</span
+              >
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+        <div class="card-footer d-flex justify-content-center">
+          <a
+            href="{{ url_for('root.transactions', page=1) }}"
+            class="btn btn-sm btn-primary"
+            >View All Transactions</a
+          >
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 mb-4">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Budget Status</h5>
+        </div>
+        <div class="card-body">
+          {% for budget in budget_status %}
+          <div class="mb-3">
+            <h6>{{ budget.category }}</h6>
+            <div class="progress">
+              <div
+                class="progress-bar bg-{{ budget.status_color }}"
+                role="progressbar"
+                style="width: {{ budget.percentage }}%"
+                aria-valuenow="{{ budget.percentage }}"
+                aria-valuemin="0"
+                aria-valuemax="100"
+              >
+                {{ budget.percentage }}%
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="card-footer d-flex justify-content-center">
+          <a href="{{ url_for('root.budget') }}" class="btn btn-sm btn-primary"
+            >Manage Budgets</a
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %} {% block body_scripts %}
+<script>
+  // Sample chart data
+  const ctx = document.getElementById("spendingChart").getContext("2d");
+  new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+      datasets: [
+        {
+          label: "Monthly Spending",
+          data: [1200, 1900, 1500, 2000, 1800, 2150],
+          backgroundColor: "rgba(54, 162, 235, 0.5)",
+          borderColor: "rgba(54, 162, 235, 1)",
+          borderWidth: 1,
+        },
+      ],
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true,
+        },
+      },
+    },
+  });
+</script>
+{% endblock body_scripts %}
