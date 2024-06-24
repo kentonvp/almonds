@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import date, datetime
 
 
 def format_date(s: datetime) -> str:
@@ -6,5 +6,4 @@ def format_date(s: datetime) -> str:
 
 
 def format_currency(s: float) -> str:
-    print(s)
     return f"${s:.2f}".replace("$-", "-$")

@@ -1,5 +1,6 @@
+from werkzeug.security import check_password_hash, generate_password_hash
+
 from almonds.crud import user_crud
-from werkzeug.security import check_password_hash
 
 
 def validate_login(username: str, password: str) -> bool:
@@ -11,5 +12,8 @@ def validate_login(username: str, password: str) -> bool:
 
 
 def is_valid_password(password: str) -> bool:
-    # Add password checks...
     return len(password) > 3
+
+
+def hash_password(password: str) -> str:
+    return generate_password_hash(password)

@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, session, url_for, redirect
+from flask import Blueprint, redirect, render_template, request, session, url_for
 
 root = Blueprint("root", __name__)
 

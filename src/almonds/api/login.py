@@ -1,11 +1,10 @@
 from flask import Blueprint, redirect, render_template, request, session, url_for
 from pydantic import EmailStr
 from pydantic.types import SecretStr
-from werkzeug.security import generate_password_hash
 
 from almonds.crud import user_crud
 from almonds.schemas.user import UserBase
-from almonds.services.login import validate_login, is_valid_password
+from almonds.services.login import hash_password, is_valid_password, validate_login
 
 login_bp = Blueprint("login", __name__)
 
@@ -65,7 +64,7 @@ def handle_new_user():
             user = user_crud.create_user(
                 UserBase(
                     username=username,
-                    password=SecretStr(generate_password_hash(password)),
+                    password=SecretStr(hash_password(password)),
                     email=email,
                 )
             )

@@ -1,8 +1,8 @@
 from flask import Flask
 
-from almonds.api.root import root
 from almonds.api.login import login_bp
 from almonds.api.plaid import plaid_bp
+from almonds.api.root import root
 from almonds.db.base import Base, engine
 from almonds.templates.filters import format_currency, format_date
 
