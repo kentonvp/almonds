@@ -2,7 +2,7 @@ import os
 
 from flask import Blueprint, request, session, url_for
 
-from almonds.plaid import core
+from almonds.services.plaid import core
 
 plaid_bp = Blueprint("plaid", __name__)
 

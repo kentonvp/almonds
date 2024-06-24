@@ -9,7 +9,7 @@ from plaid.model.link_token_create_request import LinkTokenCreateRequest
 from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
 from plaid.model.products import Products
 
-from almonds.plaid.client import client
+from almonds.services.plaid.client import client
 
 
 def create_link_token() -> str:
