@@ -2,7 +2,7 @@ from flask import Blueprint, redirect, render_template, request, session, url_fo
 from pydantic import EmailStr
 from pydantic.types import SecretStr
 
-from almonds.crud import user_crud
+from almonds.crud import user as crud_user
 from almonds.schemas.user import UserBase
 from almonds.services.login import hash_password, is_valid_password, validate_login
 
@@ -55,13 +55,13 @@ def handle_new_user():
             return render_template(
                 "create_user.html", error_msg="Password does not satisfy checks..."
             )
-        elif user_crud.get_user_by_username(username) is not None:
+        elif crud_user.get_user_by_username(username) is not None:
             return render_template(
                 "create_user.html",
                 error_msg="That username is already taken, please try another...",
             )
         else:
-            user = user_crud.create_user(
+            user = crud_user.create_user(
                 UserBase(
                     username=username,
                     password=SecretStr(hash_password(password)),
