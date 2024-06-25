@@ -6,11 +6,16 @@ from sqlalchemy.sql import delete, select, update
 
 from almonds.db.database import SessionLocal
 from almonds.models.goal import Goal as GoalModel
-from almonds.schemas.goal import Goal, GoalBase
+from almonds.schemas.goal import Goal, GoalBase, GoalUpdate
 
 
 def create_goal(goal: GoalBase, *, sessionmaker: sessionmaker_ = SessionLocal) -> Goal:
-    created_goal = Goal(id=uuid4(), **goal.model_dump())
+    created_goal = Goal(
+        id=uuid4(),
+        created_at=datetime.utcnow(),
+        last_updated=datetime.utcnow(),
+        **goal.model_dump(),
+    )
 
     model = GoalModel(**created_goal.model_dump())
     with sessionmaker() as session:
@@ -46,15 +51,21 @@ def get_goals_by_user(
     return [Goal.model_validate(g) for g in goals]
 
 
-def update_goal(goal: Goal, *, sessionmaker: sessionmaker_ = SessionLocal) -> Goal:
-    goal.last_updated = datetime.utcnow()
+def update_goal(
+    goal_update: GoalUpdate, *, sessionmaker: sessionmaker_ = SessionLocal
+) -> Goal:
 
     with sessionmaker() as session:
         stmt = (
-            update(GoalModel).where(GoalModel.id == goal.id).values(**goal.model_dump())
+            update(GoalModel)
+            .where(GoalModel.id == goal_update.id)
+            .values(**goal_update.model_dump(), last_updated=datetime.utcnow())
+            .returning(GoalModel)
         )
-        session.execute(stmt)
+        goal_ = session.scalars(stmt).first()
         session.commit()
+
+        goal = Goal.model_validate(goal_)
 
     return goal
 

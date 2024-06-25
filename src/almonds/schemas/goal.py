@@ -11,11 +11,14 @@ class GoalBase(BaseModel):
     current_amount: float
     deadline: date
     status: str
-    created_at: datetime
-    last_updated: datetime
 
 
-class Goal(GoalBase):
+class GoalUpdate(GoalBase):
+    id: UUID
+
+
+class Goal(GoalUpdate):
     model_config = ConfigDict(from_attributes=True)
 
-    id: UUID
+    created_at: datetime
+    last_updated: datetime
