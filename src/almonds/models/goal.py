@@ -20,4 +20,4 @@ class Goal(Base):
     deadline = Column(Date)
     status = Column(String(MAX_STATUS_LENGTH))
     created_at = Column(DateTime)
-    updated_at = Column(DateTime)
+    last_updated = Column(DateTime)

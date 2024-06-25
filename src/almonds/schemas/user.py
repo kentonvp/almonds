@@ -10,9 +10,12 @@ class UserBase(BaseModel):
     password: SecretStr
 
 
-class User(UserBase):
+class UserUpdate(UserBase):
+    id: UUID
+
+
+class User(UserUpdate):
     model_config = ConfigDict(from_attributes=True)
 
-    id: UUID
     created_at: datetime
     last_updated: datetime

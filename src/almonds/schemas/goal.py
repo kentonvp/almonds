@@ -12,7 +12,7 @@ class GoalBase(BaseModel):
     deadline: date
     status: str
     created_at: datetime
-    updated_at: datetime
+    last_updated: datetime
 
 
 class Goal(GoalBase):
