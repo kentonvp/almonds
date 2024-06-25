@@ -71,12 +71,14 @@ def update_user(
                 password=user_update.password.get_secret_value(),
                 last_updated=datetime.utcnow(),
             )
+            .returning(UserModel)
         )
-        session.execute(stmt)
+        updated_user = session.scalars(stmt).first()
         session.commit()
 
-    user = get_user_by_id(user_update.id, sessionmaker=sessionmaker)
-    assert user is not None, "Updated a nonexistent user?"
+        user = User.model_validate(updated_user)
+
+    print(user)
     return user
 
 
