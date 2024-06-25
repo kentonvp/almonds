@@ -78,7 +78,6 @@ def update_user(
 
         user = User.model_validate(updated_user)
 
-    print(user)
     return user
 
 
