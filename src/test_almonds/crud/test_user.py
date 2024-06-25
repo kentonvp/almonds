@@ -5,10 +5,10 @@ from pydantic import SecretStr
 
 from almonds.crud.user import (
     create_user,
+    delete_user,
     get_user_by_id,
     get_user_by_username,
     update_user,
-    delete_user,
 )
 from almonds.models.user import User as UserModel
 from almonds.schemas.user import User, UserBase, UserUpdate

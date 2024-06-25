@@ -18,7 +18,9 @@ def create_category(
         session.add(model)
         session.commit()
 
-    return Category.model_validate(model)
+        created_category = Category.model_validate(model)
+
+    return created_category
 
 
 def get_category_by_name(
