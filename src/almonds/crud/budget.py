@@ -11,9 +11,9 @@ from almonds.schemas.budget import Budget, BudgetBase
 def create_budget(
     budget: BudgetBase, *, sessionmaker: sessionmaker_ = SessionLocal
 ) -> Budget:
-    created_budget = Budget(id=uuid4(), **budget.dict())
+    created_budget = Budget(id=uuid4(), **budget.model_dump())
 
-    model = BudgetModel(**created_budget.dict())
+    model = BudgetModel(**created_budget.model_dump())
 
     with sessionmaker() as session:
         session.add(model)
@@ -32,7 +32,7 @@ def get_budget(
     if not budget:
         return None
 
-    return Budget.from_orm(budget)
+    return Budget.model_validate(budget)
 
 
 def get_budgets_by_user_id(
@@ -45,7 +45,7 @@ def get_budgets_by_user_id(
     if not budgets:
         return []
 
-    return [Budget.from_orm(b) for b in budgets]
+    return [Budget.model_validate(b) for b in budgets]
 
 
 def update_budget(
@@ -55,7 +55,7 @@ def update_budget(
         stmt = (
             update(BudgetModel)
             .where(BudgetModel.id == budget.id)
-            .values(**budget.dict())
+            .values(**budget.model_dump())
         )
         session.execute(stmt)
         session.commit()

@@ -14,7 +14,7 @@ def create_user(user: UserBase, *, sessionmaker: sessionmaker_ = SessionLocal) -
         id=uuid4(),
         created_at=datetime.utcnow(),
         last_updated=datetime.utcnow(),
-        **user.dict()
+        **user.model_dump()
     )
     model = UserModel(
         id=created_user.id,
@@ -42,7 +42,7 @@ def get_user_by_id(
     if not user:
         return None
 
-    return User.from_orm(user)
+    return User.model_validate(user)
 
 
 def get_user_by_username(
@@ -55,7 +55,7 @@ def get_user_by_username(
     if not user:
         return None
 
-    return User.from_orm(user)
+    return User.model_validate(user)
 
 
 def update_user(

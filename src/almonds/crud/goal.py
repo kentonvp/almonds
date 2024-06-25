@@ -10,9 +10,9 @@ from almonds.schemas.goal import Goal, GoalBase
 
 
 def create_goal(goal: GoalBase, *, sessionmaker: sessionmaker_ = SessionLocal) -> Goal:
-    created_goal = Goal(id=uuid4(), **goal.dict())
+    created_goal = Goal(id=uuid4(), **goal.model_dump())
 
-    model = GoalModel(**created_goal.dict())
+    model = GoalModel(**created_goal.model_dump())
     with sessionmaker() as session:
         session.add(model)
         session.commit()
@@ -30,7 +30,7 @@ def get_goal_by_id(
     if not goal:
         return None
 
-    return Goal.from_orm(goal)
+    return Goal.model_validate(goal)
 
 
 def get_goals_by_user(
@@ -43,14 +43,16 @@ def get_goals_by_user(
     if not goals:
         return []
 
-    return [Goal.from_orm(g) for g in goals]
+    return [Goal.model_validate(g) for g in goals]
 
 
 def update_goal(goal: Goal, *, sessionmaker: sessionmaker_ = SessionLocal) -> Goal:
     goal.last_updated = datetime.utcnow()
 
     with sessionmaker() as session:
-        stmt = update(GoalModel).where(GoalModel.id == goal.id).values(**goal.dict())
+        stmt = (
+            update(GoalModel).where(GoalModel.id == goal.id).values(**goal.model_dump())
+        )
         session.execute(stmt)
         session.commit()
 

@@ -18,7 +18,7 @@ def create_category(
         session.add(model)
         session.commit()
 
-    return Category.from_orm(model)
+    return Category.model_validate(model)
 
 
 def get_category_by_name(
@@ -31,7 +31,7 @@ def get_category_by_name(
     if not category:
         return None
 
-    return Category.from_orm(category)
+    return Category.model_validate(category)
 
 
 def delete_category(category_id: int, *, sessionmaker: sessionmaker_ = SessionLocal):

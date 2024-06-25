@@ -12,9 +12,9 @@ from almonds.schemas.transaction import Transaction, TransactionBase
 def create_transaction(
     transaction: TransactionBase, *, sessionmaker: sessionmaker_ = SessionLocal
 ) -> Transaction:
-    created_transaction = Transaction(id=uuid4(), **transaction.dict())
+    created_transaction = Transaction(id=uuid4(), **transaction.model_dump())
 
-    model = TransactionModel(**created_transaction.dict())
+    model = TransactionModel(**created_transaction.model_dump())
 
     with sessionmaker() as session:
         session.add(model)
@@ -33,7 +33,7 @@ def get_transaction_by_id(
     if not transaction:
         return None
 
-    return Transaction.from_orm(transaction)
+    return Transaction.model_validate(transaction)
 
 
 def get_transactions_by_user(
@@ -46,7 +46,7 @@ def get_transactions_by_user(
     if not transactions:
         return []
 
-    return [Transaction.from_orm(tx) for tx in transactions]
+    return [Transaction.model_validate(tx) for tx in transactions]
 
 
 def update_transaction(
@@ -56,7 +56,7 @@ def update_transaction(
         stmt = (
             update(TransactionModel)
             .where(TransactionModel.id == transaction.id)
-            .values(**transaction.dict())
+            .values(**transaction.model_dump())
         )
         session.execute(stmt)
         session.commit()
