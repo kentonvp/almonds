@@ -57,8 +57,11 @@ def update_transaction(
             update(TransactionModel)
             .where(TransactionModel.id == transaction.id)
             .values(**transaction.model_dump())
+            .returning(TransactionModel)
         )
-        session.execute(stmt)
+        transaction_ = session.scalars(stmt).first()
         session.commit()
+
+        transaction = Transaction.model_validate(transaction_)
 
     return transaction
