@@ -12,7 +12,7 @@ from almonds.models.constants import (
 class Transaction(Base):
     __tablename__ = "transactions"
 
-    transaction_id = Column(Integer, primary_key=True)
+    id = Column(UUID(as_uuid=True), primary_key=True)
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
     amount = Column(Numeric(MAX_DOLLAR_DIGITS, 2), nullable=False)
