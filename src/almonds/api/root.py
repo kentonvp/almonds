@@ -1,3 +1,10 @@
+import datetime
+
+# tmp
+import random
+
+import pandas as pd
+import plotly.graph_objects as go
 from flask import Blueprint, redirect, render_template, request, session, url_for
 
 root = Blueprint("root", __name__)
@@ -14,15 +21,8 @@ def build_context(**kwargs) -> dict:
     return base | kwargs
 
 
-@root.route("/")
-def view():
-    if "username" not in session:
-        context = build_context()
-        return render_template("login.html", **context)
-
-    context = build_context(current_page="root")
-
-    """"
+def user_context() -> dict:
+    """Returns a dictionary with the following structure:
     user: {
         username (string)
         total_balance (float)
@@ -31,7 +31,7 @@ def view():
         savings_goal_progress (int)
     }
     """
-    context |= {
+    return {
         "user": {
             "total_balance": 0.0,
             "income_this_month": 0.0,
@@ -40,7 +40,9 @@ def view():
         }
     }
 
-    """
+
+def top_expsenses() -> dict:
+    """Returns a dictionary with the following structure:
     top_expenses: [
         {
             category (string)
@@ -49,9 +51,21 @@ def view():
         ...
     ]
     """
-    context |= {"top_expenses": []}
+    return {
+        "top_expenses": sorted(
+            [
+                {"category": "Food", "amount": 75.0},
+                {"category": "Transportation", "amount": 75.0},
+                {"category": "Travel", "amount": 800.0},
+            ],
+            key=lambda x: x["amount"],
+            reverse=True,
+        )
+    }
 
-    """
+
+def recent_transactions() -> dict:
+    """Returns a dictionary with the following structure:
     recent_transactions: [
         {
             description (string)
@@ -61,9 +75,38 @@ def view():
         ...
     ]
     """
-    context |= {"recent_transactions": []}
+    return {
+        "recent_transactions": sorted(
+            [
+                {
+                    "description": "Off The Wall",
+                    "date": datetime.date(2024, 8, 2),
+                    "amount": -75.0,
+                },
+                {
+                    "description": "Uber",
+                    "date": datetime.date(2024, 7, 15),
+                    "amount": -15.0,
+                },
+                {
+                    "description": "Airbnb",
+                    "date": datetime.date(2024, 7, 14),
+                    "amount": -800.0,
+                },
+                {
+                    "description": "Paycheck",
+                    "date": datetime.date(2024, 8, 1),
+                    "amount": 1000.0,
+                },
+            ],
+            key=lambda x: x["date"],
+            reverse=True,
+        )
+    }
 
-    """
+
+def budget_status() -> dict:
+    """Returns a dictionary with the following structure:
     budget_status: [
         {
             category (string)
@@ -73,12 +116,118 @@ def view():
         ...
     ]
     """
-    context |= {"budget_status": []}
+    return {
+        "budget_status": sorted(
+            [
+                {"category": "Food", "percentage": 50, "status_color": "success"},
+                {
+                    "category": "Transportation",
+                    "percentage": 25,
+                    "status_color": "success",
+                },
+                {"category": "Travel", "percentage": 90, "status_color": "warning"},
+            ],
+            key=lambda x: x["percentage"],
+            reverse=True,
+        )
+    }
 
+
+def spending_chart() -> dict:
+    """Returns a dictionary with the following structure:
+    {
+        spending_chart (string html)
+    }
     """
-    spending_chart (string html)
-    """
-    context |= {"spending_chart": "<div>Chart Goes Here</div>"}
+
+    # Generate mock data
+    end_date = datetime.datetime.now()
+    dates_12m = pd.date_range(end=end_date, periods=12, freq="ME")
+    spending_12m = [random.randint(500, 1500) for _ in range(12)]
+
+    # Create DataFrame
+    df = pd.DataFrame({"Date": dates_12m, "Spending": spending_12m})
+
+    # Create traces for 3, 6, and 12 months
+    trace_3m = go.Scatter(
+        x=df["Date"][-3:], y=df["Spending"][-3:], mode="lines+markers", name="3 Months"
+    )
+    trace_6m = go.Scatter(
+        x=df["Date"][-6:], y=df["Spending"][-6:], mode="lines+markers", name="6 Months"
+    )
+    trace_12m = go.Scatter(
+        x=df["Date"], y=df["Spending"], mode="lines+markers", name="12 Months"
+    )
+
+    # Create layout
+    layout = go.Layout(
+        title="Monthly Spending Over Time",
+        xaxis=dict(title="Date"),
+        yaxis=dict(title="Spending ($)"),
+        legend=dict(x=0, y=1.1, orientation="h"),
+        updatemenus=[
+            dict(
+                type="buttons",
+                direction="right",
+                active=2,
+                x=0.57,
+                y=1.2,
+                buttons=list(
+                    [
+                        dict(
+                            label="3 Months",
+                            method="update",
+                            args=[
+                                {"visible": [True, False, False]},
+                                {"title": "Monthly Spending - Last 3 Months"},
+                            ],
+                        ),
+                        dict(
+                            label="6 Months",
+                            method="update",
+                            args=[
+                                {"visible": [False, True, False]},
+                                {"title": "Monthly Spending - Last 6 Months"},
+                            ],
+                        ),
+                        dict(
+                            label="12 Months",
+                            method="update",
+                            args=[
+                                {"visible": [False, False, True]},
+                                {"title": "Monthly Spending - Last 12 Months"},
+                            ],
+                        ),
+                    ]
+                ),
+            )
+        ],
+    )
+
+    fig = go.Figure(data=[trace_3m, trace_6m, trace_12m], layout=layout)
+    print(fig.to_html(full_html=False, include_plotlyjs="cdn"))
+
+    return {"spending_chart": fig.to_html(full_html=False, include_plotlyjs="cdn")}
+
+
+@root.route("/")
+def view():
+    if "username" not in session:
+        context = build_context()
+        return render_template("login.html", **context)
+
+    context = build_context(
+        current_page="root",
+        plaid_access_token=session.get("access_token"),
+        plaid_item_id=session.get("item_id"),
+    )
+
+    context |= user_context()
+    context |= top_expsenses()
+    context |= recent_transactions()
+    context |= budget_status()
+    context |= spending_chart()
+
     return render_template("root.html", **context)
 
 
