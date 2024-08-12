@@ -1,0 +1,16 @@
+INSERT INTO categories (name) VALUES ('Housing');
+INSERT INTO categories (name) VALUES ('Utilities');
+INSERT INTO categories (name) VALUES ('Groceries');
+INSERT INTO categories (name) VALUES ('Transportation');
+INSERT INTO categories (name) VALUES ('Insurance');
+INSERT INTO categories (name) VALUES ('Healthcare');
+INSERT INTO categories (name) VALUES ('Debt payments');
+INSERT INTO categories (name) VALUES ('Savings/Investments');
+INSERT INTO categories (name) VALUES ('Entertainment');
+INSERT INTO categories (name) VALUES ('Dining out');
+INSERT INTO categories (name) VALUES ('Personal care');
+INSERT INTO categories (name) VALUES ('Clothing');
+INSERT INTO categories (name) VALUES ('Education');
+INSERT INTO categories (name) VALUES ('Gifts/Donations');
+INSERT INTO categories (name) VALUES ('Household items');
+INSERT INTO categories (name) VALUES ('Subscriptions/Memberships');

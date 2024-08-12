@@ -5,7 +5,9 @@ import random
 
 import pandas as pd
 import plotly.graph_objects as go
-from flask import Blueprint, redirect, render_template, request, session, url_for
+from flask import Blueprint, redirect, render_template, session, url_for
+
+from almonds.crud.category import get_categories_by_user
 
 root = Blueprint("root", __name__)
 
@@ -238,9 +240,7 @@ def transactions(page: int):
 
     context = build_context()
     context |= {
-        "categories": [
-            # {id, name}
-        ],
+        "categories": get_categories_by_user(session["user_id"]),
         "transactions": [
             # {id, date, description, category, amount}
         ],

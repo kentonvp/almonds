@@ -1,0 +1,95 @@
+Housing:
+  - Rent/Mortgage
+  - Property taxes
+  - Home maintenance/repairs
+  - HOA fees
+
+Utilities:
+  - Electricity
+  - Water/Sewage
+  - Gas
+  - Internet
+  - Phone:
+      - Landline
+      - Mobile
+  - Cable/Streaming services
+
+Groceries:
+  - Food
+  - Household supplies
+  - Personal care items
+
+Transportation:
+  - Car payment
+  - Fuel
+  - Maintenance/Repairs
+  - Public transit fares
+  - Parking fees
+  - Tolls
+
+Insurance:
+  - Health
+  - Auto
+  - Home/Renters
+  - Life
+  - Disability
+
+Healthcare:
+  - Doctor visits
+  - Medications
+  - Dental care
+  - Vision care
+  - Mental health services
+
+Debt payments:
+  - Credit card debt
+  - Student loans
+  - Personal loans
+
+Savings/Investments:
+  - Emergency fund
+  - Retirement accounts:
+      - 401k
+      - IRA
+  - Other investments
+
+Entertainment:
+  - Movies/Theater
+  - Concerts/Events
+  - Hobbies
+  - Books/Music/Games
+
+Dining out:
+  - Restaurants
+  - Coffee shops
+  - Fast food
+
+Personal care:
+  - Haircuts/Salon services
+  - Gym membership
+  - Personal grooming products
+
+Clothing:
+  - Work attire
+  - Casual wear
+  - Shoes
+  - Accessories
+
+Education:
+  - Tuition
+  - Books/Supplies
+  - Courses/Workshops
+
+Gifts/Donations:
+  - Birthday/Holiday gifts
+  - Charitable donations
+
+Household items:
+  - Furniture
+  - Appliances
+  - Decor
+
+Subscriptions/Memberships:
+  - Streaming services
+  - Software subscriptions
+  - Club memberships

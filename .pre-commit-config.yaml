@@ -3,6 +3,7 @@ repos:
     rev: 7.1.1
     hooks:
       - id: flake8
+        args: ['--extend-ignore=E711,E501']
 
   - repo: https://github.com/PyCQA/isort
     rev: 5.13.2
