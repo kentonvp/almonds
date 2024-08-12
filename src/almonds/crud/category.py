@@ -1,4 +1,4 @@
-from uuid import uuid4
+from uuid import UUID
 
 from sqlalchemy.orm import sessionmaker as sessionmaker_
 from sqlalchemy.sql import delete, select, update
@@ -12,7 +12,7 @@ def create_category(
     category: CategoryBase, *, sessionmaker: sessionmaker_ = SessionLocal
 ) -> Category:
 
-    model = CategoryModel(name=category.name)
+    model = CategoryModel(name=category.name, user_id=category.user_id)
 
     with sessionmaker() as session:
         session.add(model)
@@ -23,17 +23,43 @@ def create_category(
     return created_category
 
 
-def get_category_by_name(
-    name: str, *, sessionmaker: sessionmaker_ = SessionLocal
-) -> Category | None:
+def get_default_categories(
+    *, sessionmaker: sessionmaker_ = SessionLocal
+) -> list[Category]:
     with sessionmaker() as session:
-        stmt = select(CategoryModel).where(CategoryModel.name == name)
-        category = session.scalars(stmt).first()
+        stmt = select(CategoryModel).where(CategoryModel.user_id == None)
+        categories = session.scalars(stmt).all()
 
-    if not category:
-        return None
+    return [Category.model_validate(c) for c in categories]
 
-    return Category.model_validate(category)
+
+def get_categories_by_user(
+    user_id: UUID, *, sessionmaker: sessionmaker_ = SessionLocal
+) -> list[Category]:
+    with sessionmaker() as session:
+        stmt = select(CategoryModel).where(CategoryModel.user_id == user_id)
+        categories = session.scalars(stmt).all()
+
+    defaults = get_default_categories(sessionmaker=sessionmaker)
+    if not categories:
+        return defaults
+
+    return [Category.model_validate(c) for c in categories] + defaults
+
+
+def update_category(
+    category: Category, *, sessionmaker: sessionmaker_ = SessionLocal
+) -> Category:
+    with sessionmaker() as session:
+        stmt = (
+            update(CategoryModel)
+            .where(CategoryModel.id == category.id)
+            .values(name=category.name)
+        )
+        session.execute(stmt)
+        session.commit()
+
+    return category
 
 
 def delete_category(category_id: int, *, sessionmaker: sessionmaker_ = SessionLocal):

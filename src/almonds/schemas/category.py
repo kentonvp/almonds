@@ -1,8 +1,11 @@
+from uuid import UUID
+
 from pydantic import BaseModel, ConfigDict
 
 
 class CategoryBase(BaseModel):
     name: str
+    user_id: UUID | None
 
 
 class Category(CategoryBase):

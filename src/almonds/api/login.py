@@ -1,5 +1,4 @@
 from flask import Blueprint, redirect, render_template, request, session, url_for
-from pydantic import EmailStr
 from pydantic.types import SecretStr
 
 from almonds.crud import user as crud_user
@@ -9,6 +8,11 @@ from almonds.services.login import hash_password, is_valid_password, validate_lo
 login_bp = Blueprint("login", __name__)
 
 
+def store_user_session(user):
+    session["username"] = user.username
+    session["user_id"] = user.id
+
+
 @login_bp.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -16,8 +20,8 @@ def login():
         password = request.form["password"]
 
         # Confirm login correct.
-        if validate_login(username, password):
-            session["username"] = username
+        if user := validate_login(username, password):
+            store_user_session(user)
         else:
             return render_template(
                 "login.html", error_msg="Incorrect username or password..."
@@ -68,7 +72,6 @@ def handle_new_user():
                     email=email,
                 )
             )
-
-            session["username"] = username
+            store_user_session(user)
 
     return redirect(url_for("root.view"))
