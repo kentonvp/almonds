@@ -6,7 +6,7 @@ from pydantic import SecretStr
 from werkzeug.security import check_password_hash
 
 from almonds.crud import user as crud_user
-from almonds.schemas.user import User, UserBase
+from almonds.schemas.user import User
 from almonds.services.login import hash_password, is_valid_password, validate_login
 
 
@@ -32,21 +32,21 @@ def mock_get_user_by_username(monkeypatch, mock_user):
 
 
 def test_validate_login_success(mock_get_user_by_username, mock_user):
-    assert validate_login(mock_user.username, "correctpassword") == True
+    assert validate_login(mock_user.username, "correctpassword") is not None
 
 
 def test_validate_login_wrong_password(mock_get_user_by_username, mock_user):
-    assert validate_login(mock_user.username, "wrongpassword") == False
+    assert validate_login(mock_user.username, "wrongpassword") is None
 
 
 def test_validate_login_nonexistent_user(mock_get_user_by_username):
-    assert validate_login("nonexistentuser", "anypassword") == False
+    assert validate_login("nonexistentuser", "anypassword") is None
 
 
 def test_is_valid_password():
-    assert is_valid_password("validpass") == True
-    assert is_valid_password("123") == False
-    assert is_valid_password("") == False
+    assert is_valid_password("validpass")
+    assert not is_valid_password("123")
+    assert not is_valid_password("")
 
 
 def test_hash_password():
@@ -55,4 +55,4 @@ def test_hash_password():
     assert hashed != password
     assert len(hashed) > len(password)
 
-    assert check_password_hash(hashed, password) == True
+    assert check_password_hash(hashed, password)
