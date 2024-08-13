@@ -7,9 +7,12 @@ import pandas as pd
 import plotly.graph_objects as go
 from flask import Blueprint, redirect, render_template, session, url_for
 
-from almonds.crud.category import get_categories_by_user
+import almonds.crud.category as crud_category
+import almonds.crud.transaction as crud_transaction
 
 root = Blueprint("root", __name__)
+
+TRANSACTION_LIMIT = 25
 
 
 def build_context(**kwargs) -> dict:
@@ -67,43 +70,13 @@ def top_expsenses() -> dict:
 
 
 def recent_transactions() -> dict:
-    """Returns a dictionary with the following structure:
-    recent_transactions: [
-        {
-            description (string)
-            date (datetime)
-            amount (float)
-        }
-        ...
-    ]
-    """
     return {
-        "recent_transactions": sorted(
-            [
-                {
-                    "description": "Off The Wall",
-                    "date": datetime.date(2024, 8, 2),
-                    "amount": -75.0,
-                },
-                {
-                    "description": "Uber",
-                    "date": datetime.date(2024, 7, 15),
-                    "amount": -15.0,
-                },
-                {
-                    "description": "Airbnb",
-                    "date": datetime.date(2024, 7, 14),
-                    "amount": -800.0,
-                },
-                {
-                    "description": "Paycheck",
-                    "date": datetime.date(2024, 8, 1),
-                    "amount": 1000.0,
-                },
-            ],
-            key=lambda x: x["date"],
-            reverse=True,
-        )
+        "recent_transactions": [
+            txn.model_dump()
+            for txn in crud_transaction.get_transactions_by_user(
+                session["user_id"], limit=5
+            )
+        ]
     }
 
 
@@ -233,18 +206,36 @@ def view():
     return render_template("root.html", **context)
 
 
+@root.route("/transactions", defaults={"page": 1})
 @root.route("/transactions/<int:page>")
 def transactions(page: int):
     if "username" not in session:
         return redirect(url_for("root.view"))
 
+    page_transactions = crud_transaction.get_transactions_by_user(
+        session["user_id"],
+        limit=TRANSACTION_LIMIT,
+        offset=(page - 1) * TRANSACTION_LIMIT,
+    )
+    display_transactions = [
+        txn.model_dump()
+        | {
+            "category": crud_category.get_category_by_id(
+                session["user_id"], txn.category_id
+            )
+        }
+        for txn in page_transactions
+    ]
+
+    total_pages = (
+        crud_transaction.count_transactions(session["user_id"]) // TRANSACTION_LIMIT + 1
+    )
+
     context = build_context()
     context |= {
-        "categories": get_categories_by_user(session["user_id"]),
-        "transactions": [
-            # {id, date, description, category, amount}
-        ],
-        "pagination": {"page_n": page, "total_pages": 1},
+        "categories": crud_category.get_categories_by_user(session["user_id"]),
+        "transactions": display_transactions,
+        "pagination": {"page_n": page, "total_pages": total_pages},
     }
     return render_template("transactions.html", current_page="transactions", **context)
 

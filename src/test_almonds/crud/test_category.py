@@ -6,6 +6,7 @@ from almonds.crud.category import (
     create_category,
     delete_category,
     get_categories_by_user,
+    get_category_by_id,
     update_category,
 )
 from almonds.schemas.category import Category, CategoryBase
@@ -24,6 +25,21 @@ def test_create_category(sessionmaker_test, sample_category_base):
     assert isinstance(created_category, Category)
     assert isinstance(created_category.id, int)
     assert created_category.name == sample_category_base.name
+
+
+def test_get_category_by_id(sessionmaker_test, sample_category_base):
+    created_category = create_category(
+        sample_category_base, sessionmaker=sessionmaker_test
+    )
+
+    retrieved_category = get_category_by_id(
+        created_category.user_id, created_category.id, sessionmaker=sessionmaker_test
+    )
+
+    assert retrieved_category
+    assert retrieved_category.id == created_category.id
+    assert retrieved_category.user_id == created_category.user_id
+    assert retrieved_category.name == created_category.name
 
 
 def test_get_categories_by_user(sessionmaker_test, sample_category_base):

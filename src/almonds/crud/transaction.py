@@ -1,8 +1,7 @@
-from datetime import datetime
 from uuid import UUID, uuid4
 
 from sqlalchemy.orm import sessionmaker as sessionmaker_
-from sqlalchemy.sql import delete, select, update
+from sqlalchemy.sql import select, update
 
 from almonds.db.database import SessionLocal
 from almonds.models.transaction import Transaction as TransactionModel
@@ -23,6 +22,19 @@ def create_transaction(
     return created_transaction
 
 
+def count_transactions(
+    user_id: UUID, *, sessionmaker: sessionmaker_ = SessionLocal
+) -> int:
+    with sessionmaker() as session:
+        count = (
+            session.query(TransactionModel)
+            .where(TransactionModel.user_id == user_id)
+            .count()
+        )
+
+    return count
+
+
 def get_transaction_by_id(
     transaction_id: UUID, *, sessionmaker: sessionmaker_ = SessionLocal
 ) -> Transaction | None:
@@ -37,10 +49,20 @@ def get_transaction_by_id(
 
 
 def get_transactions_by_user(
-    user_id: UUID, *, sessionmaker: sessionmaker_ = SessionLocal
+    user_id: UUID,
+    *,
+    limit: int = 500,
+    offset=0,
+    sessionmaker: sessionmaker_ = SessionLocal
 ) -> list[Transaction]:
     with sessionmaker() as session:
-        stmt = select(TransactionModel).where(TransactionModel.user_id == user_id)
+        stmt = (
+            select(TransactionModel)
+            .where(TransactionModel.user_id == user_id)
+            .order_by(TransactionModel.datetime.desc())
+            .limit(limit)
+            .offset(offset)
+        )
         transactions = session.scalars(stmt).all()
 
     if not transactions:

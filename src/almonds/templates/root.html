@@ -94,7 +94,7 @@ block header %} {% endblock header %} {% block content %}
               <div>
                 <h6 class="mb-0">{{ transaction.description }}</h6>
                 <small class="text-muted"
-                  >{{ transaction.date | format_date }}</small
+                  >{{ transaction.datetime | format_date }}</small
                 >
               </div>
               <span

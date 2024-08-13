@@ -68,7 +68,7 @@
           <tbody id="transactions-body">
             {% for transaction in transactions %}
             <tr>
-              <td>{{ transaction.date | format_date }}</td>
+              <td>{{ transaction.datetime | format_date }}</td>
               <td>{{ transaction.description }}</td>
               <td>{{ transaction.category }}</td>
               <td
@@ -169,13 +169,14 @@
           ></button>
         </div>
         <div class="modal-body">
-          <form id="add-transaction-form">
+          <form id="add-transaction-form" action="{{ url_for('transaction.create_transaction') }}" method="POST">
             <div class="mb-3">
               <label for="transaction-date" class="form-label">Date</label>
               <input
                 type="date"
                 class="form-control"
                 id="transaction-date"
+                name="transaction-date"
                 required
               />
             </div>
@@ -187,6 +188,7 @@
                 type="text"
                 class="form-control"
                 id="transaction-description"
+                name="transaction-description"
                 required
               />
             </div>
@@ -194,7 +196,7 @@
               <label for="transaction-category" class="form-label"
                 >Category</label
               >
-              <select class="form-select" id="transaction-category" required>
+              <select class="form-select" id="transaction-category" name="transaction-category" required>
                 {% for category in categories %}
                 <option value="{{ category.id }}">{{ category.name }}</option>
                 {% endfor %}
@@ -206,6 +208,7 @@
                 type="number"
                 class="form-control"
                 id="transaction-amount"
+                name="transaction-amount"
                 step="0.01"
                 required
               />
