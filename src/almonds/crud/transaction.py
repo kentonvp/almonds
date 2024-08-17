@@ -90,17 +90,35 @@ def update_transaction(
     return transaction
 
 
+def delete_transaction(
+    transaction_id: UUID, *, sessionmaker: sessionmaker_ = SessionLocal
+) -> None:
+    with sessionmaker() as session:
+        stmt = select(TransactionModel).where(TransactionModel.id == transaction_id)
+        transaction = session.scalars(stmt).first()
+
+        if not transaction:
+            return
+
+        session.delete(transaction)
+        session.commit()
+
+
 def get_transactions_by_month(
     user_id: UUID,
-    month: int = datetime.date.today().month,
+    today: datetime.date = None,
     *,
     sessionmaker: sessionmaker_ = SessionLocal
 ) -> list[Transaction]:
+    if today is None:
+        # For testing purposes, we allow to pass a specific date
+        today = datetime.date.today()
+
     with sessionmaker() as session:
-        stmt = (
-            select(TransactionModel)
-            .where(TransactionModel.user_id == user_id)
-            .where(extract("month", TransactionModel.datetime) == month)
+        stmt = select(TransactionModel).where(
+            TransactionModel.user_id == user_id,
+            extract("month", TransactionModel.datetime) == today.month,
+            extract("year", TransactionModel.datetime) == today.year,
         )
         transactions = session.scalars(stmt).all()
 

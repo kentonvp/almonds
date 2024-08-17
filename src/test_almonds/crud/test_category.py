@@ -33,7 +33,7 @@ def test_get_category_by_id(sessionmaker_test, sample_category_base):
     )
 
     retrieved_category = get_category_by_id(
-        created_category.user_id, created_category.id, sessionmaker=sessionmaker_test
+        created_category.id, sessionmaker=sessionmaker_test
     )
 
     assert retrieved_category

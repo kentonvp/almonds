@@ -16,6 +16,8 @@ plaid-python = "^23.0.0"
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.2"
 pre-commit = "^3.8.0"
+coverage = "^7.6.1"
+pytest-cov = "^5.0.0"
 
 [tool.isort]
 profile = "black"

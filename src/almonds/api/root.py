@@ -120,7 +120,7 @@ def user_context() -> dict:
             "username": session["username"],
             "total_balance": income + expense,
             "income_this_month": income,
-            "expenses_this_month": expense,
+            "expenses_this_month": abs(expense),
             "savings_goal_progress": 0.0,
         }
     }
@@ -136,6 +136,8 @@ def top_expsenses() -> dict:
         ...
     ]
     """
+
+    crud_transaction.get_transactions_agg_category(session["user_id"])
     return {
         "top_expenses": sorted(
             [

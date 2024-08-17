@@ -10,7 +10,7 @@
       />
       Almonds
     </a>
-    {% if user.username is defined %}
+    {% if user is defined and user.username is defined %}
     <ul class="navbar-nav me-auto">
       <li class="nav-item">
         <a
