@@ -24,12 +24,10 @@ def create_category(
 
 
 def get_category_by_id(
-    user_id: UUID, category_id: int, *, sessionmaker: sessionmaker_ = SessionLocal
+    category_id: int, *, sessionmaker: sessionmaker_ = SessionLocal
 ) -> Category | None:
     with sessionmaker() as session:
-        stmt = select(CategoryModel).where(
-            CategoryModel.id == category_id, CategoryModel.user_id == user_id
-        )
+        stmt = select(CategoryModel).where(CategoryModel.id == category_id)
         category = session.scalar(stmt)
 
     if not category:

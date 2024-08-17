@@ -2,11 +2,7 @@ from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import UUID, DateTime, Integer, Numeric, String
 
 from almonds.db.database import Base
-from almonds.models.constants import (
-    MAX_DESCRIPTION_LENGTH,
-    MAX_DOLLAR_DIGITS,
-    MAX_TRANSACTION_NAME_LENGTH,
-)
+from almonds.models.constants import MAX_DESCRIPTION_LENGTH, MAX_DOLLAR_DIGITS
 
 
 class Transaction(Base):

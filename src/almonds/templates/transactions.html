@@ -105,7 +105,7 @@
           >
             <a
               class="page-link"
-              href="{{ url_for('transactions.home', page=pagination.page_n-1) if pagination.page_n > 1 else '#' }}"
+              href="{{ url_for('transactions.view', page=pagination.page_n-1) if pagination.page_n > 1 else '#' }}"
               >Previous</a
             >
           </li>
@@ -115,7 +115,7 @@
           >
             <a
               class="page-link"
-              href="{{ url_for('transactions.home', page=pagination.page_n) }}"
+              href="{{ url_for('transactions.view', page=pagination.page_n) }}"
               >{{ page }}</a
             >
           </li>
@@ -125,7 +125,7 @@
           >
             <a
               class="page-link"
-              href="{{ url_for('transactions.home', page=pagination.page_n+1) if pagination.page_n < pagination.total_pages else '#' }}"
+              href="{{ url_for('transactions.view', page=pagination.page_n+1) if pagination.page_n < pagination.total_pages else '#' }}"
               >Next</a
             >
           </li>
@@ -251,5 +251,117 @@
       </div>
     </div>
   </div>
+  <!-- Edit Transaction Modal -->
+  <div class="modal fade" id="editTransactionModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="editTransactionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title" id="editTransactionModalLabel">Edit Transaction</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="edit-transaction-form" action="{{ url_for('transactions.update_transaction') }}" method="POST">
+            <input type="hidden" id="edit-transaction-id" name="transaction-id">
+            <div class="mb-3">
+              <label for="edit-transaction-date" class="form-label">Date</label>
+              <input type="date" class="form-control" id="edit-transaction-date" name="transaction-date" required>
+            </div>
+            <div class="mb-3">
+              <label for="edit-transaction-description" class="form-label">Description</label>
+              <input type="text" class="form-control" id="edit-transaction-description" name="transaction-description" required>
+            </div>
+            <div class="mb-3">
+              <label for="edit-transaction-category" class="form-label">Category</label>
+              <select class="form-select" id="edit-transaction-category" name="transaction-category" required>
+                {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="edit-transaction-amount" class="form-label">Amount</label>
+              <input type="number" class="form-control" id="edit-transaction-amount" name="transaction-amount" step="0.01" required>
+            </div>
+            <div class="mb-3">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="transaction-type" id="edit-income" value="income">
+                <label class="form-check-label" for="edit-income">Income</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="transaction-type" id="edit-expense" value="expense">
+                <label class="form-check-label" for="edit-expense">Expense</label>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" form="edit-transaction-form" class="btn btn-primary">Update Transaction</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-{% endblock content%} {% block body_scripts %} {% endblock body_scripts %}
+{% endblock content%}
+
+{% block body_scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const editButtons = document.querySelectorAll('.edit-transaction');
+    editButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const transactionId = this.getAttribute('data-id');
+        // Fetch transaction data from the server using the ID
+        fetch(
+          "{{ url_for('transactions.get_transaction') }}", 
+          {
+            body: JSON.stringify({transaction_id: transactionId}),
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'}
+          }
+        )
+          .then(response => response.json())
+          .then(data => {
+            // Populate the edit modal with the fetched data
+            document.getElementById('edit-transaction-id').value = data.id;
+            document.getElementById('edit-transaction-date').value = data.date;
+            document.getElementById('edit-transaction-description').value = data.description;
+            document.getElementById('edit-transaction-category').value = data.category_id;
+            document.getElementById('edit-transaction-amount').value = Math.abs(data.amount);
+            if (data.amount > 0) {
+              document.getElementById('edit-income').checked = true;
+            } else {
+              document.getElementById('edit-expense').checked = true;
+            }
+            
+            // Show the edit modal
+            const editModal = new bootstrap.Modal(document.getElementById('editTransactionModal'));
+            editModal.show();
+          });
+      });
+    });
+  });
+
+  // Delete transaction button event listener
+  const deleteButtons = document.querySelectorAll('.delete-transaction');
+  deleteButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const transactionId = this.getAttribute('data-id');
+      if (confirm('Are you sure you want to delete this transaction?')) {
+        fetch("{{ url_for('transactions.delete_transaction') }}", {
+          body: JSON.stringify({transaction_id: transactionId}),
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'}
+        })
+        .then(response => {
+          if (response.ok) {
+            // Remove the transaction from the table
+            this.closest('tr').remove();
+          } else {
+            alert('Failed to delete the transaction. Please try again.');
+          }
+        });
+      }
+    });
+  });
+</script>
+{% endblock body_scripts %}

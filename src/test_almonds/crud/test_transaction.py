@@ -178,3 +178,47 @@ def test_count_transactions(sessionmaker_test, sample_transaction_base):
     user_id = sample_transaction_base.user_id
     count = crud_transaction.count_transactions(user_id, sessionmaker=sessionmaker_test)
     assert count == 5
+
+
+def test_delete_transaction(sessionmaker_test, sample_transaction_base):
+    created_transaction = crud_transaction.create_transaction(
+        sample_transaction_base, sessionmaker=sessionmaker_test
+    )
+
+    crud_transaction.delete_transaction(
+        created_transaction.id, sessionmaker=sessionmaker_test
+    )
+
+    retrieved_transaction = crud_transaction.get_transaction_by_id(
+        created_transaction.id, sessionmaker=sessionmaker_test
+    )
+    assert retrieved_transaction is None
+
+
+def test_delete_transaction_missing(sessionmaker_test):
+    # Should not raise exception
+    crud_transaction.delete_transaction(uuid4(), sessionmaker=sessionmaker_test)
+
+
+def test_get_transactions_by_month(sessionmaker_test, sample_transaction_base):
+    # Create 5 transactions
+    for _ in range(5):
+        crud_transaction.create_transaction(
+            sample_transaction_base, sessionmaker=sessionmaker_test
+        )
+
+    user_id = sample_transaction_base.user_id
+    today = sample_transaction_base.datetime.date()
+    transactions = crud_transaction.get_transactions_by_month(
+        user_id, today, sessionmaker=sessionmaker_test
+    )
+
+    assert len(transactions) == 5
+
+    user_id = sample_transaction_base.user_id
+    today = sample_transaction_base.datetime.date() - datetime.timedelta(days=365)
+    transactions = crud_transaction.get_transactions_by_month(
+        user_id, today, sessionmaker=sessionmaker_test
+    )
+
+    assert not transactions

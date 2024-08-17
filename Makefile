@@ -1,14 +1,8 @@
-ENV_FILE:=.env
-
-.PHONY: app format pre-commit tests
+.PHONY: app test
 
 app:
-	env `cat ${ENV_FILE} | grep -v "#" | xargs` poetry run python src/run.py
+	dotenvx run -- poetry run python src/run.py
 
-format:
-	poetry run isort . && poetry run black .
+test:
+	poetry run pytest --cov -v
 
-pre-commit: format tests
-
-tests:
-	poetry run pytest
