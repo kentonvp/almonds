@@ -105,7 +105,7 @@
           >
             <a
               class="page-link"
-              href="{{ url_for('transactions.home', page=pagination.page_n-1) if pagination.page_n > 1 else '#' }}"
+              href="{{ url_for('transactions.view', page=pagination.page_n-1) if pagination.page_n > 1 else '#' }}"
               >Previous</a
             >
           </li>
@@ -115,7 +115,7 @@
           >
             <a
               class="page-link"
-              href="{{ url_for('transactions.home', page=pagination.page_n) }}"
+              href="{{ url_for('transactions.view', page=pagination.page_n) }}"
               >{{ page }}</a
             >
           </li>
@@ -125,7 +125,7 @@
           >
             <a
               class="page-link"
-              href="{{ url_for('transactions.home', page=pagination.page_n+1) if pagination.page_n < pagination.total_pages else '#' }}"
+              href="{{ url_for('transactions.view', page=pagination.page_n+1) if pagination.page_n < pagination.total_pages else '#' }}"
               >Next</a
             >
           </li>
