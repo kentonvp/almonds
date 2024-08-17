@@ -24,7 +24,7 @@ jobs:
         poetry install
 
     - name: Run tests
-      run: poetry run pytest
+      run: poetry run pytest --cov
 
     - name: Upload coverage data
       uses: actions/upload-artifact@v4
@@ -35,7 +35,7 @@ jobs:
 
   coverage:
     name: Combine and check coverage
-    needs: tests
+    needs: pytest
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
