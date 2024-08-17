@@ -7,19 +7,19 @@
   <!-- Filter and Search Section -->
   <div class="card mb-4">
     <div class="card-body">
-      <form id="transaction-filter" class="row g-3">
+      <form id="transaction-filter" class="row g-3" action="{{ url_for('transactions.filter_form') }}" method="POST">
         <div class="col-md-3">
           <label for="date-range" class="form-label">Date Range</label>
-          <select id="date-range" class="form-select">
+          <select id="date-range" name="date-range" class="form-select">
             <option value="7">Last 7 days</option>
             <option value="30" selected>Last 30 days</option>
             <option value="90">Last 90 days</option>
-            <option value="custom">Custom Range</option>
+            <!--<option value="custom">Custom Range</option>-->
           </select>
         </div>
         <div class="col-md-3">
           <label for="category" class="form-label">Category</label>
-          <select id="category" class="form-select">
+          <select id="category" class="form-select" name="category">
             <option value="">All Categories</option>
             {% for category in categories %}
             <option value="{{ category.id }}">{{ category.name }}</option>
@@ -28,7 +28,7 @@
         </div>
         <div class="col-md-3">
           <label for="type" class="form-label">Type</label>
-          <select id="type" class="form-select">
+          <select id="type" class="form-select" name="type">
             <option value="">All Types</option>
             <option value="income">Income</option>
             <option value="expense">Expense</option>
@@ -39,6 +39,7 @@
           <input
             type="text"
             id="search"
+            name="search"
             class="form-control"
             placeholder="Search transactions..."
           />
@@ -104,7 +105,7 @@
           >
             <a
               class="page-link"
-              href="{{ url_for('root.transactions', page=pagination.page_n-1) if pagination.page_n > 1 else '#' }}"
+              href="{{ url_for('transactions.home', page=pagination.page_n-1) if pagination.page_n > 1 else '#' }}"
               >Previous</a
             >
           </li>
@@ -114,7 +115,7 @@
           >
             <a
               class="page-link"
-              href="{{ url_for('root.transactions', page=pagination.page_n) }}"
+              href="{{ url_for('transactions.home', page=pagination.page_n) }}"
               >{{ page }}</a
             >
           </li>
@@ -124,7 +125,7 @@
           >
             <a
               class="page-link"
-              href="{{ url_for('root.transactions', page=pagination.page_n+1) if pagination.page_n < pagination.total_pages else '#' }}"
+              href="{{ url_for('transactions.home', page=pagination.page_n+1) if pagination.page_n < pagination.total_pages else '#' }}"
               >Next</a
             >
           </li>
@@ -169,7 +170,7 @@
           ></button>
         </div>
         <div class="modal-body">
-          <form id="add-transaction-form" action="{{ url_for('transaction.create_transaction') }}" method="POST">
+          <form id="add-transaction-form" action="{{ url_for('transactions.create_transaction') }}" method="POST">
             <div class="mb-3">
               <label for="transaction-date" class="form-label">Date</label>
               <input

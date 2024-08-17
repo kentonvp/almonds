@@ -10,12 +10,12 @@
       />
       Almonds
     </a>
-    {% if username is defined %}
+    {% if user.username is defined %}
     <ul class="navbar-nav">
       <li class="nav-item">
         <a
           class="nav-link {{'active' if current_page == 'transactions' else ''}}"
-          href="{{ url_for('root.transactions', page=1) }}"
+          href="{{ url_for('transactions.home') }}"
           >Transactions</a
         >
       </li>

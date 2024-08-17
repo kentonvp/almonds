@@ -6,11 +6,11 @@ block header %} {% endblock header %} {% block content %}
     <strong>plaid_item_id:</strong> {{ plaid_item_id }}
   </p>
   <h1 class="mb-4">
-    Welcome back, <span class="fw-bold text-capitalize">{{ username }}</span>!
+    Welcome back, <span class="fw-bold text-capitalize">{{ user.username }}</span>!
   </h1>
   <div class="row">
     <div class="col-md-6 col-lg-3 mb-4">
-      <div class="card bg-success text-white">
+      <div class="card bg-warning text-white">
         <div class="card-body">
           <h5 class="card-title">Total Balance</h5>
           <p class="card-text display-6">
@@ -30,7 +30,7 @@ block header %} {% endblock header %} {% block content %}
       </div>
     </div>
     <div class="col-md-6 col-lg-3 mb-4">
-      <div class="card bg-warning text-dark">
+      <div class="card bg-danger text-white">
         <div class="card-body">
           <h5 class="card-title">Expenses This Month</h5>
           <p class="card-text display-6">
@@ -40,7 +40,7 @@ block header %} {% endblock header %} {% block content %}
       </div>
     </div>
     <div class="col-md-6 col-lg-3 mb-4">
-      <div class="card bg-danger text-white">
+      <div class="card bg-success text-white">
         <div class="card-body">
           <h5 class="card-title">Savings Goal Progress</h5>
           <p class="card-text display-6">{{ user.savings_goal_progress }}%</p>
@@ -107,7 +107,7 @@ block header %} {% endblock header %} {% block content %}
         </ul>
         <div class="card-footer d-flex justify-content-center">
           <a
-            href="{{ url_for('root.transactions', page=1) }}"
+            href="{{ url_for('transactions.home', page=1) }}"
             class="btn btn-sm btn-primary"
             >View All Transactions</a
           >

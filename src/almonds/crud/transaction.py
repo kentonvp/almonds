@@ -1,7 +1,8 @@
+import datetime
 from uuid import UUID, uuid4
 
 from sqlalchemy.orm import sessionmaker as sessionmaker_
-from sqlalchemy.sql import select, update
+from sqlalchemy.sql import extract, select, update
 
 from almonds.db.database import SessionLocal
 from almonds.models.transaction import Transaction as TransactionModel
@@ -87,3 +88,20 @@ def update_transaction(
         transaction = Transaction.model_validate(transaction_)
 
     return transaction
+
+
+def get_transactions_by_month(
+    user_id: UUID,
+    month: int = datetime.date.today().month,
+    *,
+    sessionmaker: sessionmaker_ = SessionLocal
+) -> list[Transaction]:
+    with sessionmaker() as session:
+        stmt = (
+            select(TransactionModel)
+            .where(TransactionModel.user_id == user_id)
+            .where(extract("month", TransactionModel.datetime) == month)
+        )
+        transactions = session.scalars(stmt).all()
+
+    return [Transaction.model_validate(tx) for tx in transactions]

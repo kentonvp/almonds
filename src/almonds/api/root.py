@@ -7,21 +7,89 @@ import pandas as pd
 import plotly.graph_objects as go
 from flask import Blueprint, redirect, render_template, session, url_for
 
-import almonds.crud.category as crud_category
 import almonds.crud.transaction as crud_transaction
 
 root = Blueprint("root", __name__)
 
-TRANSACTION_LIMIT = 25
+
+@root.route("/")
+def view():
+    if "username" not in session:
+        context = build_context()
+        return render_template("login.html", **context)
+
+    context = build_context(
+        current_page="root",
+        plaid_access_token=session.get("access_token"),
+        plaid_item_id=session.get("item_id"),
+    )
+
+    context |= user_context()
+    context |= top_expsenses()
+    context |= recent_transactions()
+    context |= budget_status()
+    context |= spending_chart()
+
+    return render_template("root.html", **context)
 
 
+@root.route("/budget")
+def budget():
+    if "username" not in session:
+        return redirect(url_for("root.view"))
+
+    context = build_context()
+    return render_template(
+        "budget.html",
+        current_page="budget",
+        user={"username": session["username"]},
+        **context
+    )
+
+
+@root.route("/goals")
+def goals():
+    if "username" not in session:
+        return redirect(url_for("root.view"))
+
+    context = build_context()
+    return render_template(
+        "goals.html",
+        current_page="goals",
+        user={"username": session["username"]},
+        **context
+    )
+
+
+@root.route("/settings")
+def settings():
+    if "username" not in session:
+        return redirect(url_for("root.view"))
+
+    context = build_context()
+    return render_template(
+        "settings.html",
+        current_page="settings",
+        user={"username": session["username"]},
+        **context
+    )
+
+
+@root.route("/plaidLogin")
+def plaid_login():
+    return render_template("plaid.html")
+
+
+@root.route("/oauth")
+def oauth_login():
+    return render_template("oauth.html")
+
+
+# Helper functions ////////////////////////////////////////////////////////////
 def build_context(**kwargs) -> dict:
     base = {
         "title": "Dashboard",
     }
-
-    if "username" in session:
-        base["username"] = session["username"]
 
     return base | kwargs
 
@@ -36,12 +104,24 @@ def user_context() -> dict:
         savings_goal_progress (int)
     }
     """
+    transactions = crud_transaction.get_transactions_by_month(session["user_id"])
+
+    income = 0.0
+    expense = 0.0
+
+    for txn in transactions:
+        if txn.amount > 0:
+            income += txn.amount
+        else:
+            expense += txn.amount
+
     return {
         "user": {
-            "total_balance": 0.0,
-            "income_this_month": 0.0,
-            "expenses_this_month": 0.0,
-            "savings_goal_progress": 0,
+            "username": session["username"],
+            "total_balance": income + expense,
+            "income_this_month": income,
+            "expenses_this_month": expense,
+            "savings_goal_progress": 0.0,
         }
     }
 
@@ -183,95 +263,3 @@ def spending_chart() -> dict:
     print(fig.to_html(full_html=False, include_plotlyjs="cdn"))
 
     return {"spending_chart": fig.to_html(full_html=False, include_plotlyjs="cdn")}
-
-
-@root.route("/")
-def view():
-    if "username" not in session:
-        context = build_context()
-        return render_template("login.html", **context)
-
-    context = build_context(
-        current_page="root",
-        plaid_access_token=session.get("access_token"),
-        plaid_item_id=session.get("item_id"),
-    )
-
-    context |= user_context()
-    context |= top_expsenses()
-    context |= recent_transactions()
-    context |= budget_status()
-    context |= spending_chart()
-
-    return render_template("root.html", **context)
-
-
-@root.route("/transactions", defaults={"page": 1})
-@root.route("/transactions/<int:page>")
-def transactions(page: int):
-    if "username" not in session:
-        return redirect(url_for("root.view"))
-
-    page_transactions = crud_transaction.get_transactions_by_user(
-        session["user_id"],
-        limit=TRANSACTION_LIMIT,
-        offset=(page - 1) * TRANSACTION_LIMIT,
-    )
-    display_transactions = [
-        txn.model_dump()
-        | {
-            "category": crud_category.get_category_by_id(
-                session["user_id"], txn.category_id
-            )
-        }
-        for txn in page_transactions
-    ]
-
-    total_pages = (
-        crud_transaction.count_transactions(session["user_id"]) // TRANSACTION_LIMIT + 1
-    )
-
-    context = build_context()
-    context |= {
-        "categories": crud_category.get_categories_by_user(session["user_id"]),
-        "transactions": display_transactions,
-        "pagination": {"page_n": page, "total_pages": total_pages},
-    }
-    return render_template("transactions.html", current_page="transactions", **context)
-
-
-@root.route("/budget")
-def budget():
-    if "username" not in session:
-        return redirect(url_for("root.view"))
-
-    context = build_context()
-    return render_template("budget.html", current_page="budget", **context)
-
-
-@root.route("/goals")
-def goals():
-    if "username" not in session:
-        return redirect(url_for("root.view"))
-
-    context = build_context()
-    return render_template("goals.html", current_page="goals", **context)
-
-
-@root.route("/settings")
-def settings():
-    if "username" not in session:
-        return redirect(url_for("root.view"))
-
-    context = build_context()
-    return render_template("settings.html", current_page="settings", **context)
-
-
-@root.route("/plaidLogin")
-def plaid_login():
-    return render_template("plaid.html")
-
-
-@root.route("/oauth")
-def oauth_login():
-    return render_template("oauth.html")
