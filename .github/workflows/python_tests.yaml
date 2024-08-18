@@ -57,7 +57,7 @@ jobs:
 
       - name: Combine coverage and fail it it’s under 85 %
         run: |
-          python -m coverage combine
+          # python -m coverage combine
           python -m coverage html --skip-covered --skip-empty
           python -m coverage report | sed 's/^/    /' >> $GITHUB_STEP_SUMMARY
           python -m coverage report --fail-under=85
