@@ -7,6 +7,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from flask import Blueprint, redirect, render_template, session, url_for
 
+import almonds.crud.category as crud_category
 import almonds.crud.transaction as crud_transaction
 
 root = Blueprint("root", __name__)
@@ -137,14 +138,24 @@ def top_expsenses() -> dict:
     ]
     """
 
-    crud_transaction.get_transactions_agg_category(session["user_id"])
+    transactions = crud_transaction.get_transactions_by_month(session["user_id"])
+    categories = {}
+    category_ids = {}
+    for txn in transactions:
+        if txn.category_id not in category_ids:
+            category_ids[txn.category_id] = crud_category.get_category_by_id(
+                txn.category_id
+            )
+
+        category = category_ids[txn.category_id].name
+        if category not in categories:
+            categories[category] = 0.0
+
+        categories[category] += abs(txn.amount)
+
     return {
         "top_expenses": sorted(
-            [
-                {"category": "Food", "amount": 75.0},
-                {"category": "Transportation", "amount": 75.0},
-                {"category": "Travel", "amount": 800.0},
-            ],
+            [{"category": c, "amount": amt} for c, amt in categories.items()],
             key=lambda x: x["amount"],
             reverse=True,
         )
