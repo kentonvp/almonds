@@ -34,15 +34,6 @@ def view():
     return render_template("root.html", **context)
 
 
-@root.route("/budget")
-def budget():
-    if "username" not in session:
-        return redirect(url_for("root.view"))
-
-    context = build_context()
-    return render_template("budget.html", current_page="budget", **context)
-
-
 @root.route("/goals")
 def goals():
     if "username" not in session:

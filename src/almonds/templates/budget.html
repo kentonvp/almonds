@@ -1,5 +1,136 @@
-{% extends 'base.html' %} {% block head_scripts %} {%endblock head_scripts%} {%
-block title %} {% endblock title %} {% block header %} {% endblock header %} {%
-block content %}
-<h1>Budget</h1>
-{% endblock content %} {% block body_scripts %} {%endblock body_scripts%}
+{% extends 'base.html' %}
+
+{% block head_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock head_scripts %}
+
+{% block content %}
+<div class="container mt-4">
+  <h1 class="mb-4">Budget</h1>
+
+  <!-- Budget Table -->
+  <table class="table table-striped table-hover">
+    <thead>
+      <tr>
+        <th>Category</th>
+        <th>Budget</th>
+        <th>Spent</th>
+        <th>Percentage</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for budget in budgets %}
+      <tr>
+        <td>{{ budget.category }}</td>
+        <td>{{ budget.amount | format_currency }}</td>
+        <td>{{ budget.spent | format_currency }}</td>
+        <td>
+          <div class="progress">
+            <div class="progress-bar bg-{{ budget.status_color }}"
+                 role="progressbar" 
+                 style="width: {{ budget.spent_percentage }}%" 
+                 aria-valuenow="{{ budget.spent_percentage }}" 
+                 aria-valuemin="0" 
+                 aria-valuemax="100">{{ budget.spent_percentage|round|int }}%</div>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- Add Budget Button -->
+  <div class="mt-4">
+    <button
+      type="button"
+      class="btn btn-primary mb-4"
+      data-bs-toggle="modal"
+      data-bs-target="#addBudgetModal"
+    >
+      Add Budget
+    </button>
+  </div>
+
+  <!-- Add Budget Modal -->
+  <div
+    class="modal fade"
+    id="addBudgetModal"
+    tabindex="-1"
+    data-bs-backdrop="static"
+    data-bs-keyboard="false"
+    aria-labelledby="addBudgetModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addBudgetModalLabel">
+            Add New Budget
+          </h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <form id="addBudgetForm" action="{{ url_for('budget.create_budget') }}" method="POST">
+            <div class="mb-3">
+              <label for="budget-category" class="form-label">Category</label>
+              <select class="form-select" id="budget-category" name="budget-category" required>
+                <option value="">Choose a category...</option>
+                {% for category in categories %}
+                  <option value="{{ category.id }}">{{ category.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="budget-amount" class="form-label">Budget Amount</label>
+              <input type="number" class="form-control" id="budget-amount" name="budget-amount" required>
+              <small id="last-month-spending" class="form-text text-muted"></small>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" form="addBudgetForm" class="btn btn-primary"> Save Budget </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock content %}
+
+{% block body_scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const categorySelect = document.getElementById('budget-category');
+    const budgetAmount = document.getElementById('budget-amount');
+    const lastMonthSpending = document.getElementById('last-month-spending');
+
+    categorySelect.addEventListener('change', function() {
+      const categoryId = this.value;
+      if (categoryId) {
+        const lastMonthAmount = getLastMonthSpending(categoryId);
+        lastMonthSpending.textContent = `Last month's spending: ${lastMonthAmount}`;
+      } else {
+        lastMonthSpending.textContent = '';
+      }
+    });
+
+    function getLastMonthSpending(categoryId) {
+      fetch("{{ url_for('budget.get_last_month_spending') }}", {
+        body: JSON.stringify({ category_id: categoryId }),
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+        .then(response => response.json())
+        .then(data => {
+          return data.amount;
+        });
+    }
+  });
+</script>
+{% endblock body_scripts %}
