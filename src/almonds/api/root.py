@@ -40,12 +40,7 @@ def budget():
         return redirect(url_for("root.view"))
 
     context = build_context()
-    return render_template(
-        "budget.html",
-        current_page="budget",
-        user={"username": session["username"]},
-        **context
-    )
+    return render_template("budget.html", current_page="budget", **context)
 
 
 @root.route("/goals")
@@ -54,12 +49,7 @@ def goals():
         return redirect(url_for("root.view"))
 
     context = build_context()
-    return render_template(
-        "goals.html",
-        current_page="goals",
-        user={"username": session["username"]},
-        **context
-    )
+    return render_template("goals.html", current_page="goals", **context)
 
 
 @root.route("/settings")
@@ -68,12 +58,7 @@ def settings():
         return redirect(url_for("root.view"))
 
     context = build_context()
-    return render_template(
-        "settings.html",
-        current_page="settings",
-        user={"username": session["username"]},
-        **context
-    )
+    return render_template("settings.html", current_page="settings", **context)
 
 
 @root.route("/plaidLogin")
@@ -92,6 +77,9 @@ def build_context(**kwargs) -> dict:
         "title": "Dashboard",
     }
 
+    if "user_id" in session:
+        base["user"] = {"username": session["username"]}
+
     return base | kwargs
 
 
@@ -102,7 +90,13 @@ def user_context() -> dict:
         total_balance (float)
         income_this_month (float)
         expenses_this_month (float)
-        savings_goal_progress (int)
+        savings_goal_progress: [
+            {
+                name (string)
+                progress (int)
+            },
+            ...
+        ]
     }
     """
     transactions = crud_transaction.get_transactions_by_month(session["user_id"])
@@ -133,7 +127,7 @@ def top_expsenses() -> dict:
         {
             category (string)
             amount (float)
-        }
+        },
         ...
     ]
     """
@@ -151,7 +145,8 @@ def top_expsenses() -> dict:
         if category not in categories:
             categories[category] = 0.0
 
-        categories[category] += abs(txn.amount)
+        if txn.amount < 0:
+            categories[category] += abs(txn.amount)
 
     return {
         "top_expenses": sorted(
