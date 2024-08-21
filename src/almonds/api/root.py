@@ -1,4 +1,5 @@
 import datetime
+import math
 
 # tmp
 import random
@@ -7,6 +8,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from flask import Blueprint, redirect, render_template, session, url_for
 
+import almonds.crud.budget as crud_budget
 import almonds.crud.category as crud_category
 import almonds.crud.transaction as crud_transaction
 
@@ -170,16 +172,31 @@ def budget_status() -> dict:
         ...
     ]
     """
+    budgets = crud_budget.get_budgets_by_user_id(session["user_id"])
+    transactions = crud_transaction.get_transactions_by_month(session["user_id"])
+    category_buckets = {}
+    for txn in transactions:
+        if txn.category_id not in category_buckets:
+            category_buckets[txn.category_id] = 0.0
+        category_buckets[txn.category_id] += -(txn.amount)
+
+    categories = {
+        c.id: c.name for c in crud_category.get_categories_by_user(session["user_id"])
+    }
+
     return {
         "budget_status": sorted(
             [
-                {"category": "Food", "percentage": 50, "status_color": "success"},
                 {
-                    "category": "Transportation",
-                    "percentage": 25,
-                    "status_color": "success",
-                },
-                {"category": "Travel", "percentage": 90, "status_color": "warning"},
+                    "category": categories.get(b.category_id, "Unknown"),
+                    "percentage": int(
+                        math.ceil(
+                            category_buckets.get(b.category_id, 0) / b.amount * 100
+                        )
+                    ),
+                    "status_color": "danger",
+                }
+                for b in budgets
             ],
             key=lambda x: x["percentage"],
             reverse=True,
