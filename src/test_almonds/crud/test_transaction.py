@@ -225,6 +225,9 @@ def test_get_transactions_by_month(sessionmaker_test, sample_transaction_base):
 
 
 def test_count_transactions_by_month(sessionmaker_test, sample_transaction_base):
+    user_id = sample_transaction_base.user_id
+    today_ = sample_transaction_base.datetime.date()
+
     # Create 5 "old" transactions
     sample_transaction_base_OLD = TransactionBase(
         user_id=sample_transaction_base.user_id,
@@ -239,14 +242,17 @@ def test_count_transactions_by_month(sessionmaker_test, sample_transaction_base)
             sample_transaction_base_OLD, sessionmaker=sessionmaker_test
         )
 
+    num_transactions = crud_transaction.count_transactions_by_month(
+        user_id, today_, sessionmaker=sessionmaker_test
+    )
+    assert num_transactions == 0
+
     # Create 10 current transactions
     for _ in range(10):
         crud_transaction.create_transaction(
             sample_transaction_base, sessionmaker=sessionmaker_test
         )
 
-    user_id = sample_transaction_base.user_id
-    today_ = sample_transaction_base.datetime.date()
     num_transactions = crud_transaction.count_transactions_by_month(
         user_id, today_, sessionmaker=sessionmaker_test
     )
