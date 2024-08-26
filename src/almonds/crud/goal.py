@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 from uuid import UUID, uuid4
 
 from sqlalchemy.orm import sessionmaker as sessionmaker_
@@ -12,8 +12,8 @@ from almonds.schemas.goal import Goal, GoalBase, GoalUpdate
 def create_goal(goal: GoalBase, *, sessionmaker: sessionmaker_ = SessionLocal) -> Goal:
     created_goal = Goal(
         id=uuid4(),
-        created_at=datetime.utcnow(),
-        last_updated=datetime.utcnow(),
+        created_at=datetime.datetime.utcnow(),
+        last_updated=datetime.datetime.utcnow(),
         **goal.model_dump(),
     )
 
@@ -59,7 +59,7 @@ def update_goal(
         stmt = (
             update(GoalModel)
             .where(GoalModel.id == goal_update.id)
-            .values(**goal_update.model_dump(), last_updated=datetime.utcnow())
+            .values(**goal_update.model_dump(), last_updated=datetime.datetime.utcnow())
             .returning(GoalModel)
         )
         goal_ = session.scalars(stmt).first()

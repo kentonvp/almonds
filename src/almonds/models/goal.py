@@ -1,5 +1,5 @@
 from sqlalchemy.schema import Column, ForeignKey
-from sqlalchemy.types import UUID, Date, DateTime, Integer, Numeric, String
+from sqlalchemy.types import UUID, Date, DateTime, Numeric, String
 
 from almonds.db.database import Base
 from almonds.models.constants import (
