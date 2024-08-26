@@ -1,4 +1,6 @@
 import datetime
+import heapq
+import math
 
 # tmp
 import random
@@ -7,8 +9,10 @@ import pandas as pd
 import plotly.graph_objects as go
 from flask import Blueprint, redirect, render_template, session, url_for
 
+import almonds.crud.budget as crud_budget
 import almonds.crud.category as crud_category
 import almonds.crud.transaction as crud_transaction
+from almonds.utils import ui
 
 root = Blueprint("root", __name__)
 
@@ -32,15 +36,6 @@ def view():
     context |= spending_chart()
 
     return render_template("root.html", **context)
-
-
-@root.route("/budget")
-def budget():
-    if "username" not in session:
-        return redirect(url_for("root.view"))
-
-    context = build_context()
-    return render_template("budget.html", current_page="budget", **context)
 
 
 @root.route("/goals")
@@ -164,7 +159,10 @@ def recent_transactions() -> dict:
             for txn in crud_transaction.get_transactions_by_user(
                 session["user_id"], limit=5
             )
-        ]
+        ],
+        "total_transactions": crud_transaction.count_transactions_by_month(
+            session["user_id"]
+        ),
     }
 
 
@@ -179,21 +177,71 @@ def budget_status() -> dict:
         ...
     ]
     """
-    return {
-        "budget_status": sorted(
-            [
-                {"category": "Food", "percentage": 50, "status_color": "success"},
-                {
-                    "category": "Transportation",
-                    "percentage": 25,
-                    "status_color": "success",
-                },
-                {"category": "Travel", "percentage": 90, "status_color": "warning"},
-            ],
-            key=lambda x: x["percentage"],
-            reverse=True,
-        )
+    budgets = crud_budget.get_budgets_by_user_id(session["user_id"])
+    transactions = crud_transaction.get_transactions_by_month(session["user_id"])
+    category_buckets = {}
+    for txn in transactions:
+        if txn.category_id not in category_buckets:
+            category_buckets[txn.category_id] = 0.0
+        category_buckets[txn.category_id] += -(txn.amount)
+
+    categories = {
+        c.id: c.name for c in crud_category.get_categories_by_user(session["user_id"])
     }
+
+    # If there are leq 5 categories, nothing fancy is needed
+    # Sort and return the data
+    if len(category_buckets) <= 5:
+        return {
+            "budget_status": sorted(
+                [
+                    {
+                        "category": categories.get(b.category_id, "Unknown"),
+                        "percentage": int(
+                            math.ceil(
+                                category_buckets.get(b.category_id, 0) / b.amount * 100
+                            )
+                        ),
+                        "status_color": "success",
+                    }
+                    for b in budgets
+                ],
+                key=lambda x: x["percentage"],
+                reverse=True,
+            )
+        }
+
+    # https://docs.python.org/3/library/heapq.html
+    # "Heap elements can be tuples. This is useful for assigning comparison
+    # values (such as task priorities) alongside the main record being tracked"
+    # Note: heapq implements a min-heap so negate the percentage to replicate max-heap
+    budget_status_ = []
+    for b in budgets:
+        category = categories.get(b.category_id, "Unknown")
+        neg_percentage = -int(
+            math.ceil(category_buckets.get(b.category_id, 0) / b.amount * 100)
+        )
+        heapq.heappush(budget_status_, (neg_percentage, category))
+
+    display_list = []
+    num_overbudget = 0
+    while budget_status_ and len(display_list) < 5:
+        neg_percentage, category = heapq.heappop(budget_status_)
+
+        # Skip categories that are exactly 100% spent
+        if -neg_percentage == 100:
+            num_overbudget += 1
+            continue
+
+        display_list.append(
+            {
+                "category": category,
+                "percentage": -neg_percentage,
+                "status_color": ui.budget_color(-neg_percentage),
+            }
+        )
+
+    return {"budget_status": display_list, "num_overbudget": num_overbudget}
 
 
 def spending_chart() -> dict:

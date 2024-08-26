@@ -1,11 +1,10 @@
 from flask import Flask
 
+from almonds.api.budget import budget_bp
 from almonds.api.login import login_bp
 from almonds.api.plaid import plaid_bp
 from almonds.api.root import root
 from almonds.api.transactions import transaction_bp
-
-# from almonds.api.budgets import budget_bp
 from almonds.db.base import Base, engine
 from almonds.templates.filters import format_currency, format_date
 
@@ -23,6 +22,6 @@ def create_app():
     app.register_blueprint(login_bp)
     app.register_blueprint(plaid_bp, url_prefix="/plaid")
     app.register_blueprint(transaction_bp, url_prefix="/transactions")
-    # app.register_blueprint(budget_bp, url_prefix="/budgets")
+    app.register_blueprint(budget_bp, url_prefix="/budget")
 
     return app

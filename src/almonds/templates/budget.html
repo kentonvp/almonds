@@ -1,5 +1,330 @@
-{% extends 'base.html' %} {% block head_scripts %} {%endblock head_scripts%} {%
-block title %} {% endblock title %} {% block header %} {% endblock header %} {%
-block content %}
-<h1>Budget</h1>
-{% endblock content %} {% block body_scripts %} {%endblock body_scripts%}
+{% extends 'base.html' %}
+
+{% block head_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+{% endblock head_scripts %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="row align-items-center mb-4">
+    <div class="col">
+      <h1>Budget</h1>
+    </div>
+    <!-- Add Budget Button -->
+    <div class="col text-end">
+      <button
+        type="button"
+        class="btn btn-success mb-4"
+        data-bs-toggle="modal"
+        data-bs-target="#addBudgetModal">
+        Add New Budget
+      </button>
+    </div>
+  </div>
+
+  <!-- Budget Table -->
+  <table class="table table-striped table-hover">
+    <thead>
+      <tr>
+        <th class="text-center">
+          <button class="btn btn-link text-decoration-none" data-sort="category">
+            Category <i class="bi bi-arrow-down-up"></i>
+          </button>
+        </th>
+        <th class="text-center">
+          <button class="btn btn-link text-decoration-none" data-sort="spent">
+            Spent <i class="bi bi-arrow-down-up"></i>
+          </button>
+        </th>
+        <th class="text-center">
+          <button class="btn btn-link text-decoration-none" data-sort="budget">
+            Budget <i class="bi bi-arrow-down-up"></i>
+          </button>
+        </th>
+        <th class="text-center">
+          <button class="btn btn-link text-decoration-none" data-sort="percentage">
+            Percentage <i class="bi bi-arrow-down-up"></i>
+          </button>
+        </th>
+        <th class="text-center">Actions</th>
+      </tr>
+    </thead>
+    <tbody id="budget-table-body">
+      {% for budget in budgets %}
+      <tr>
+        <td class="text-center">{{ budget.category }}</td>
+        <td class="text-center">{{ budget.spent | format_currency }}</td>
+        <td class="text-center">{{ budget.amount | format_currency }}</td>
+        <td class="text-center">
+          <div class="progress">
+            <div class="progress-bar bg-{{ budget.status_color }}"
+                 role="progressbar" 
+                 style="width: {{ budget.percentage }}%" 
+                 aria-valuenow="{{ budget.percentage }}" 
+                 aria-valuemin="0" 
+                 aria-valuemax="100">{{ budget.percentage }}%</div>
+          </div>
+        </td>
+        <td class="text-center">
+          <button
+            type="button"
+            class="btn btn-outline-primary btn-sm edit-budget"
+            data-bs-toggle="modal"
+            data-bs-target="#editBudgetModal"
+            data-id="{{ budget.id }}">
+            Edit
+          </button>
+          <button
+            type="button"
+            class="btn btn-outline-danger btn-sm delete-budget"
+            data-id="{{ budget.id }}">
+            Delete
+          </button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- Edit Budget Modal -->
+  <div class="modal fade" id="editBudgetModal" tabindex="-1" aria-labelledby="editBudgetModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editBudgetModalLabel">Edit Budget</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="edit-budget-form" action="{{ url_for('budget.update_budget') }}" method="POST">
+            <div class="mb-3">
+              <label for="edit-budget-category" class="form-label">Category</label>
+              <input
+                type="text"
+                class="form-control"
+                id="edit-budget-category"
+                name="budget-category"
+                readonly
+              >
+            </div>
+            <div class="mb-3">
+              <label for="edit-budget-amount" class="form-label">Budget Amount</label>
+              <input type="number" class="form-control" id="edit-budget-amount" name="budget-amount" step="0.01" required>
+            </div>
+            <input type="hidden" id="edit-budget-id" name="budget-id">
+            <input type="hidden" id="edit-budget-category-id" name="budget-category-id">
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" form="edit-budget-form" class="btn btn-primary">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Budget Modal -->
+  <div
+    class="modal fade"
+    id="addBudgetModal"
+    tabindex="-1"
+    data-bs-backdrop="static"
+    data-bs-keyboard="false"
+    aria-labelledby="addBudgetModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addBudgetModalLabel">
+            Add New Budget
+          </h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <form id="add-budget-form" action="{{ url_for('budget.create_budget') }}" method="POST">
+            <div class="mb-3">
+              <label for="budget-category" class="form-label">Category</label>
+              <select class="form-select" id="budget-category" name="budget-category" required>
+                <option value="">Choose a category...</option>
+                {% for category in categories %}
+                  <option value="{{ category.id }}">{{ category.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="budget-amount" class="form-label">Budget Amount</label>
+              <input type="number" class="form-control" id="budget-amount" name="budget-amount" step="0.01" required>
+              <small id="last-month-spending" class="form-text text-muted"></small>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" form="add-budget-form" class="btn btn-primary"> Save Budget </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock content %}
+
+{% block body_scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const editButtons = document.querySelectorAll('.edit-budget');
+    editButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const budgetId = this.getAttribute('data-id');
+        // Fetch budget data from the server using the ID
+        fetch(
+          "{{ url_for('budget.get_budget') }}", 
+          {
+            body: JSON.stringify({budget_id: budgetId}),
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'}
+          }
+        )
+          .then(response => response.json())
+          .then(data => {
+            // Populate the edit modal with the fetched data
+            document.getElementById('edit-budget-id').value = budgetId;
+            document.getElementById('edit-budget-category').value = data.category;
+            document.getElementById('edit-budget-category-id').value = data.category_id;
+            document.getElementById('edit-budget-amount').value = Math.abs(data.amount);
+            
+            // Show the edit modal
+            const editModal = new bootstrap.Modal(document.getElementById('editBudgetModal'));
+            editModal.show();
+          });
+      });
+    });
+  });
+
+  // Delete budget
+  const deleteButtons = document.querySelectorAll('.delete-budget');
+  deleteButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const budgetId = this.getAttribute('data-id');
+      if (confirm('Are you sure you want to delete this budget?')) {
+        fetch("{{ url_for('budget.delete_budget') }}", {
+          body: JSON.stringify({budget_id: budgetId}),
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'}
+        })
+        .then(response => {
+          if (response.ok) {
+            // Remove the row from the table
+            this.closest('tr').remove();
+          } else {
+            alert('Failed to delete the budget. Please try again.');
+          }
+        });
+      }
+    });
+  });
+
+  // When adding a new budget, show the last month's spending for the selected category
+  document.addEventListener('DOMContentLoaded', function() {
+    const categorySelect = document.getElementById('budget-category');
+    const budgetAmount = document.getElementById('budget-amount');
+    const lastMonthSpending = document.getElementById('last-month-spending');
+
+    categorySelect.addEventListener('change', function() {
+      const categoryId = this.value;
+      if (categoryId) {
+        const lastMonthAmount = getLastMonthSpending(categoryId);
+        lastMonthSpending.textContent = `Last month's spending: ${lastMonthAmount}`;
+      } else {
+        lastMonthSpending.textContent = '';
+      }
+    });
+
+    function getLastMonthSpending(categoryId) {
+      fetch("{{ url_for('budget.get_last_month_spending') }}", {
+        body: JSON.stringify({ category_id: categoryId }),
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+        .then(response => response.json())
+        .then(data => {
+          return data.amount;
+        });
+    }
+  });
+
+  // Sorting functionality
+  document.addEventListener('DOMContentLoaded', function() {
+    const tableBody = document.getElementById('budget-table-body');
+    const sortButtons = document.querySelectorAll('[data-sort]');
+    let currentSort = { column: 'percentage', direction: 'desc', first: true };
+
+    function sortTable(column) {
+      if (currentSort.first) {
+        currentSort.first = false;
+      } else if (currentSort.column === column) {
+        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+      } else {
+        currentSort.column = column;
+        currentSort.direction = 'asc';
+      }
+
+      updateSortIndicators();
+      
+      const rows = Array.from(tableBody.querySelectorAll('tr'));
+      rows.sort((a, b) => {
+        let aValue = a.children[getColumnIndex(column)].textContent.trim();
+        let bValue = b.children[getColumnIndex(column)].textContent.trim();
+
+        if (column === 'budget' || column === 'spent') {
+          aValue = parseFloat(aValue.replace(/[^0-9.-]+/g, ""));
+          bValue = parseFloat(bValue.replace(/[^0-9.-]+/g, ""));
+        } else if (column === 'percentage') {
+          aValue = parseFloat(aValue);
+          bValue = parseFloat(bValue);
+        }
+
+        if (aValue < bValue)
+          return currentSort.direction === 'asc' ? -1 : 1;
+        if (aValue > bValue)
+          return currentSort.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+      rows.forEach(row => tableBody.appendChild(row));
+    }
+
+    function getColumnIndex(column) {
+      const columnMap = {
+        'category': 0,
+        'spent': 1,
+        'budget': 2,
+        'percentage': 3
+      };
+      return columnMap[column];
+    }
+
+    function updateSortIndicators() {
+      sortButtons.forEach(button => {
+        const icon = button.querySelector('i');
+        if (button.dataset.sort === currentSort.column) {
+          icon.className = currentSort.direction === 'asc' ? 'bi bi-arrow-up' : 'bi bi-arrow-down';
+        } else {
+          icon.className = 'bi bi-arrow-down-up';
+        }
+      });
+    }
+
+    sortButtons.forEach(button => {
+      button.addEventListener('click', () => sortTable(button.dataset.sort));
+    });
+
+    // Initial sort
+    sortTable('percentage');
+  });
+</script>
+{% endblock body_scripts %}

@@ -1,8 +1,28 @@
-{% extends 'base.html' %} {% block head_scripts %}
+{% extends 'base.html' %} 
+
+{% block head_scripts %}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-{% endblock head_scripts %} {% block content %}
+{% endblock head_scripts %}
+
+{% block content %}
 <div class="container mt-4">
-  <h1 class="mb-4">Transactions</h1>
+  <div class="row align-text-center mb-4">
+    <div class="col">
+      <h1>Transactions</h1>
+    </div>
+
+    <!-- Add Transaction Button -->
+    <div class="col text-end">
+      <button
+        type="button"
+        class="btn btn-success"
+        data-bs-toggle="modal"
+        data-bs-target="#addTransactionModal"
+      >
+        Add New Transaction
+      </button>
+    </div>
+  </div>
 
   <!-- Filter and Search Section -->
   <div class="card mb-4">
@@ -134,18 +154,6 @@
     </div>
   </div>
 
-  <!-- Add Transaction Button -->
-  <div class="mt-4">
-    <button
-      type="button"
-      class="btn btn-success"
-      data-bs-toggle="modal"
-      data-bs-target="#addTransactionModal"
-    >
-      Add New Transaction
-    </button>
-  </div>
-
   <!-- Add Transaction Modal -->
   <div
     class="modal fade"
@@ -261,7 +269,6 @@
         </div>
         <div class="modal-body">
           <form id="edit-transaction-form" action="{{ url_for('transactions.update_transaction') }}" method="POST">
-            <input type="hidden" id="edit-transaction-id" name="transaction-id">
             <div class="mb-3">
               <label for="edit-transaction-date" class="form-label">Date</label>
               <input type="date" class="form-control" id="edit-transaction-date" name="transaction-date" required>
@@ -292,6 +299,7 @@
                 <label class="form-check-label" for="edit-expense">Expense</label>
               </div>
             </div>
+            <input class="form-control" type="hidden" id="edit-transaction-id" name="transaction-id">
           </form>
         </div>
         <div class="modal-footer">
@@ -322,7 +330,7 @@
           .then(response => response.json())
           .then(data => {
             // Populate the edit modal with the fetched data
-            document.getElementById('edit-transaction-id').value = data.id;
+            document.getElementById('edit-transaction-id').value = transactionId;
             document.getElementById('edit-transaction-date').value = data.date;
             document.getElementById('edit-transaction-description').value = data.description;
             document.getElementById('edit-transaction-category').value = data.category_id;
