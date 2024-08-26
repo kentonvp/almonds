@@ -1,4 +1,5 @@
 import datetime
+import heapq
 import math
 
 # tmp
@@ -11,6 +12,7 @@ from flask import Blueprint, redirect, render_template, session, url_for
 import almonds.crud.budget as crud_budget
 import almonds.crud.category as crud_category
 import almonds.crud.transaction as crud_transaction
+from almonds.utils import ui
 
 root = Blueprint("root", __name__)
 
@@ -157,7 +159,10 @@ def recent_transactions() -> dict:
             for txn in crud_transaction.get_transactions_by_user(
                 session["user_id"], limit=5
             )
-        ]
+        ],
+        "total_transactions": crud_transaction.count_transactions_by_month(
+            session["user_id"]
+        ),
     }
 
 
@@ -184,24 +189,59 @@ def budget_status() -> dict:
         c.id: c.name for c in crud_category.get_categories_by_user(session["user_id"])
     }
 
-    return {
-        "budget_status": sorted(
-            [
-                {
-                    "category": categories.get(b.category_id, "Unknown"),
-                    "percentage": int(
-                        math.ceil(
-                            category_buckets.get(b.category_id, 0) / b.amount * 100
-                        )
-                    ),
-                    "status_color": "danger",
-                }
-                for b in budgets
-            ],
-            key=lambda x: x["percentage"],
-            reverse=True,
+    # If there are leq 5 categories, nothing fancy is needed
+    # Sort and return the data
+    if len(category_buckets) <= 5:
+        return {
+            "budget_status": sorted(
+                [
+                    {
+                        "category": categories.get(b.category_id, "Unknown"),
+                        "percentage": int(
+                            math.ceil(
+                                category_buckets.get(b.category_id, 0) / b.amount * 100
+                            )
+                        ),
+                        "status_color": "success",
+                    }
+                    for b in budgets
+                ],
+                key=lambda x: x["percentage"],
+                reverse=True,
+            )
+        }
+
+    # https://docs.python.org/3/library/heapq.html
+    # "Heap elements can be tuples. This is useful for assigning comparison
+    # values (such as task priorities) alongside the main record being tracked"
+    # Note: heapq implements a min-heap so negate the percentage to replicate max-heap
+    budget_status_ = []
+    for b in budgets:
+        category = categories.get(b.category_id, "Unknown")
+        neg_percentage = -int(
+            math.ceil(category_buckets.get(b.category_id, 0) / b.amount * 100)
         )
-    }
+        heapq.heappush(budget_status_, (neg_percentage, category))
+
+    display_list = []
+    num_overbudget = 0
+    while budget_status_ and len(display_list) < 5:
+        neg_percentage, category = heapq.heappop(budget_status_)
+
+        # Skip categories that are exactly 100% spent
+        if -neg_percentage == 100:
+            num_overbudget += 1
+            continue
+
+        display_list.append(
+            {
+                "category": category,
+                "percentage": -neg_percentage,
+                "status_color": ui.budget_color(-neg_percentage),
+            }
+        )
+
+    return {"budget_status": display_list, "num_overbudget": num_overbudget}
 
 
 def spending_chart() -> dict:

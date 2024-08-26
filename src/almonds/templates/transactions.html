@@ -299,6 +299,7 @@
                 <label class="form-check-label" for="edit-expense">Expense</label>
               </div>
             </div>
+            <input class="form-control" type="hidden" id="edit-transaction-id" name="transaction-id">
           </form>
         </div>
         <div class="modal-footer">
@@ -329,6 +330,7 @@
           .then(response => response.json())
           .then(data => {
             // Populate the edit modal with the fetched data
+            document.getElementById('edit-transaction-id').value = transactionId;
             document.getElementById('edit-transaction-date').value = data.date;
             document.getElementById('edit-transaction-description').value = data.description;
             document.getElementById('edit-transaction-category').value = data.category_id;

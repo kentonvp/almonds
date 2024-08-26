@@ -17,7 +17,7 @@ from almonds.crud import category as crud_category
 from almonds.crud import transaction as crud_transaction
 from almonds.schemas.budget import Budget, BudgetBase
 from almonds.templates.filters import format_currency
-from almonds.utils import status_code
+from almonds.utils import status_code, ui
 
 budget_bp = Blueprint("budget", __name__)
 
@@ -47,7 +47,7 @@ def view():
 
         # Add percentage and status_color
         percentage = round(spent / b.amount * 100, 2)
-        status_color = budget_color(percentage)
+        status_color = ui.budget_color(percentage)
 
         budgets.append(
             {
@@ -103,9 +103,9 @@ def create_budget():
 @budget_bp.route("/update", methods=["POST"])
 def update_budget():
     u_budget = Budget(
-        id=UUID(request.form["budget_id"]),
+        id=UUID(request.form["budget-id"]),
         user_id=session["user_id"],
-        category_id=int(request.form["budget-category"]),
+        category_id=int(request.form["budget-category-id"]),
         amount=float(request.form["budget-amount"]),
         start_date=datetime.date.today(),
     )
@@ -152,12 +152,3 @@ def build_context():
         "title": "Budgets",
         "user": {"username": session["username"]},
     }
-
-
-def budget_color(percentage: float) -> str:
-    """Return the color status of a budget based on the percentage spent."""
-    if percentage > 100:
-        return "danger"
-    if percentage > 75:
-        return "warning"
-    return "success"

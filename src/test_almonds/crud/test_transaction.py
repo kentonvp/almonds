@@ -208,17 +208,47 @@ def test_get_transactions_by_month(sessionmaker_test, sample_transaction_base):
         )
 
     user_id = sample_transaction_base.user_id
-    today = sample_transaction_base.datetime.date()
+    today_ = sample_transaction_base.datetime.date()
     transactions = crud_transaction.get_transactions_by_month(
-        user_id, today, sessionmaker=sessionmaker_test
+        user_id, today_, sessionmaker=sessionmaker_test
     )
 
     assert len(transactions) == 5
 
     user_id = sample_transaction_base.user_id
-    today = sample_transaction_base.datetime.date() - datetime.timedelta(days=365)
+    today_ = sample_transaction_base.datetime.date() - datetime.timedelta(days=365)
     transactions = crud_transaction.get_transactions_by_month(
-        user_id, today, sessionmaker=sessionmaker_test
+        user_id, today_, sessionmaker=sessionmaker_test
     )
 
     assert not transactions
+
+
+def test_count_transactions_by_month(sessionmaker_test, sample_transaction_base):
+    # Create 5 "old" transactions
+    sample_transaction_base_OLD = TransactionBase(
+        user_id=sample_transaction_base.user_id,
+        category_id=sample_transaction_base.category_id,
+        amount=sample_transaction_base.amount,
+        description=sample_transaction_base.description,
+        datetime=sample_transaction_base.datetime - datetime.timedelta(days=45),
+    )
+
+    for _ in range(5):
+        crud_transaction.create_transaction(
+            sample_transaction_base_OLD, sessionmaker=sessionmaker_test
+        )
+
+    # Create 10 current transactions
+    for _ in range(10):
+        crud_transaction.create_transaction(
+            sample_transaction_base, sessionmaker=sessionmaker_test
+        )
+
+    user_id = sample_transaction_base.user_id
+    today_ = sample_transaction_base.datetime.date()
+    num_transactions = crud_transaction.count_transactions_by_month(
+        user_id, today_, sessionmaker=sessionmaker_test
+    )
+
+    assert num_transactions == 10

@@ -1,5 +1,10 @@
-{% extends 'base.html' %} {% block head_scripts %} {% endblock head_scripts%} {%
-block header %} {% endblock header %} {% block content %}
+{% extends 'base.html' %}
+
+{% block head_scripts %} {% endblock head_scripts%}
+
+{% block header %} {% endblock header %}
+
+{% block content %}
 <div class="container mt-4">
   <p id="debug-display" class="alert alert-warning mt-3 mb-3" role="alert">
     <strong>plaid_access_token:</strong> {{ plaid_access_token }}<br />
@@ -85,7 +90,14 @@ block header %} {% endblock header %} {% block content %}
     <div class="col-md-6 mb-4">
       <div class="card">
         <div class="card-header">
-          <h5 class="card-title mb-0">Recent Transactions</h5>
+          <div class = "row align-items-center">
+            <div class="col">
+              <h5 class="card-title mb-0">Recent Transactions</h5>
+            </div>
+            <div class="col text-end">
+              <small class="text-muted">{{ total_transactions }} total transactions</small>
+            </div>
+          </div>
         </div>
         <ul class="list-group list-group-flush">
           {% for transaction in recent_transactions %}
@@ -117,7 +129,14 @@ block header %} {% endblock header %} {% block content %}
     <div class="col-md-6 mb-4">
       <div class="card">
         <div class="card-header">
-          <h5 class="card-title mb-0">Budget Status</h5>
+          <div class = "row align-items-center">
+            <div class="col">
+              <h5 class="card-title mb-0">Budget Status</h5>
+            </div>
+            <div class="col text-end">
+              <small class="text-muted">Overbudget: {{ num_overbudget }} categories</small>
+            </div>
+          </div>
         </div>
         <div class="card-body">
           {% for budget in budget_status %}

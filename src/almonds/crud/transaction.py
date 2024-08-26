@@ -123,3 +123,27 @@ def get_transactions_by_month(
         transactions = session.scalars(stmt).all()
 
     return [Transaction.model_validate(tx) for tx in transactions]
+
+
+def count_transactions_by_month(
+    user_id: UUID,
+    today: datetime.date = None,
+    *,
+    sessionmaker: sessionmaker_ = SessionLocal
+) -> int:
+    if today is None:
+        # For testing purposes, we allow to pass a specific date
+        today = datetime.date.today()
+
+    with sessionmaker() as session:
+        count = (
+            session.query(TransactionModel)
+            .where(
+                TransactionModel.user_id == user_id,
+                extract("month", TransactionModel.datetime) == today.month,
+                extract("year", TransactionModel.datetime) == today.year,
+            )
+            .count()
+        )
+
+    return count

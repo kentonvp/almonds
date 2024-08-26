@@ -79,24 +79,27 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form id="editBudgetForm" action="{{ url_for('budget.update_budget') }}">
+          <form id="edit-budget-form" action="{{ url_for('budget.update_budget') }}" method="POST">
             <div class="mb-3">
               <label for="editCategorySelect" class="form-label">Category</label>
               <input
                 type="text"
                 class="form-control"
                 id="edit-budget-category"
+                name="budget-category"
                 readonly
               >
             </div>
             <div class="mb-3">
               <label for="editBudgetAmount" class="form-label">Budget Amount</label>
-              <input type="number" class="form-control" id="edit-budget-amount" name="edit-budget-amount" required>
+              <input type="number" class="form-control" id="edit-budget-amount" name="budget-amount" step="0.01" required>
             </div>
+            <input type="hidden" id="edit-budget-id" name="budget-id">
+            <input type="hidden" id="edit-budget-category-id" name="budget-category-id">
           </form>
         </div>
         <div class="modal-footer">
-          <button type="submit" form="editBudgetForm" class="btn btn-primary">Save Changes</button>
+          <button type="submit" form="edit-budget-form" class="btn btn-primary">Save Changes</button>
         </div>
       </div>
     </div>
@@ -126,7 +129,7 @@
           ></button>
         </div>
         <div class="modal-body">
-          <form id="addBudgetForm" action="{{ url_for('budget.create_budget') }}" method="POST">
+          <form id="add-budget-form" action="{{ url_for('budget.create_budget') }}" method="POST">
             <div class="mb-3">
               <label for="budget-category" class="form-label">Category</label>
               <select class="form-select" id="budget-category" name="budget-category" required>
@@ -138,13 +141,13 @@
             </div>
             <div class="mb-3">
               <label for="budget-amount" class="form-label">Budget Amount</label>
-              <input type="number" class="form-control" id="budget-amount" name="budget-amount" required>
+              <input type="number" class="form-control" id="budget-amount" name="budget-amount" step="0.01" required>
               <small id="last-month-spending" class="form-text text-muted"></small>
             </div>
           </form>
         </div>
         <div class="modal-footer">
-          <button type="submit" form="addBudgetForm" class="btn btn-primary"> Save Budget </button>
+          <button type="submit" form="add-budget-form" class="btn btn-primary"> Save Budget </button>
         </div>
       </div>
     </div>
@@ -171,7 +174,9 @@
           .then(response => response.json())
           .then(data => {
             // Populate the edit modal with the fetched data
+            document.getElementById('edit-budget-id').value = budgetId;
             document.getElementById('edit-budget-category').value = data.category;
+            document.getElementById('edit-budget-category-id').value = data.category_id;
             document.getElementById('edit-budget-amount').value = Math.abs(data.amount);
             
             // Show the edit modal
