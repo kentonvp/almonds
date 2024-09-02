@@ -118,7 +118,7 @@
           <form id="add-goal-form" action="{{ url_for('goal.create_goal') }}" method="POST">
             <div class="mb-3">
               <label for="add-goal-name" class="form-label">Goal Name</label>
-              <input type="text" class="form-control" id="add-goal-name" name="name" autocomplete="off" required>
+              <input type="text" class="form-control" id="add-goal-name" name="goal-name" autocomplete="off" required>
             </div>
             <div class="mb-3">
               <label for="add-goal-target-amount" class="form-label">Target Amount</label>
@@ -161,7 +161,7 @@
           <form id="edit-goal-form" action="{{ url_for('goal.update_goal') }}" method="POST">
             <div class="mb-3">
               <label for="edit-goal-name" class="form-label">Goal Name</label>
-              <input type="text" class="form-control" id="edit-goal-name" name="edit-goal-name" required>
+              <input type="text" class="form-control" id="edit-goal-name" name="goal-name" required>
             </div>
             <div class="mb-3">
               <label for="edit-goal-target-amount" class="form-label">Target Amount</label>

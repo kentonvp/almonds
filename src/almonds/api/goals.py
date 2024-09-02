@@ -12,7 +12,7 @@ from flask import (
 )
 
 from almonds.crud import goal as crud_goal
-from almonds.schemas.goal import Goal, GoalBase
+from almonds.schemas.goal import GoalBase, GoalUpdate
 from almonds.utils import status_code
 
 goal_bp = Blueprint("goal", __name__)
@@ -40,7 +40,10 @@ def get_goal():
     goal = crud_goal.get_goal_by_id(goal_id)
     if goal:
         return (
-            jsonify(goal.model_dump()),
+            jsonify(
+                goal.model_dump()
+                | {"deadline_datestr": goal.deadline.strftime("%Y-%m-%d")}
+            ),
             status_code.HTTP_200_OK,
         )
 
@@ -63,18 +66,14 @@ def create_goal():
 
 @goal_bp.route("/update", methods=["POST"])
 def update_goal():
-    goal_ = crud_goal.get_goal_by_id(UUID(request.form["goal_id"]))
-
-    u_goal = Goal(
-        id=UUID(request.form["goal_id"]),
+    u_goal = GoalUpdate(
+        id=UUID(request.form["goal-id"]),
         user_id=session["user_id"],
-        name=request.form["name"],
-        target_amount=float(request.form["target_amount"]),
-        current_amount=float(request.form["current_amount"]),
-        deadline=datetime.datetime.strptime(request.form["deadline"], "%Y-%m-%d"),
-        status=request.form["status"],
-        created_at=goal_.created_at,
-        last_updated=datetime.datetime.utcnow(),
+        name=request.form["goal-name"],
+        target_amount=float(request.form["goal-target-amount"]),
+        current_amount=float(request.form["goal-current-amount"]),
+        deadline=datetime.datetime.strptime(request.form["goal-deadline"], "%Y-%m-%d"),
+        status=request.form["goal-status"],
     )
     crud_goal.update_goal(u_goal)
     return redirect(url_for("goal.view"))

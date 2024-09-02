@@ -1,16 +1,11 @@
-import datetime
 import heapq
 import math
 
-# tmp
-import random
-
-import pandas as pd
-import plotly.graph_objects as go
 from flask import Blueprint, redirect, render_template, session, url_for
 
 import almonds.crud.budget as crud_budget
 import almonds.crud.category as crud_category
+import almonds.crud.goal as crud_goal
 import almonds.crud.transaction as crud_transaction
 from almonds.utils import ui
 
@@ -30,21 +25,13 @@ def view():
     )
 
     context |= user_context()
-    context |= top_expsenses()
+    context |= top_expenses()
     context |= recent_transactions()
     context |= budget_status()
     context |= spending_chart()
+    context |= saving_goals()
 
     return render_template("root.html", **context)
-
-
-@root.route("/goals")
-def goals():
-    if "username" not in session:
-        return redirect(url_for("root.view"))
-
-    context = build_context()
-    return render_template("goals.html", current_page="goals", **context)
 
 
 @root.route("/settings")
@@ -116,7 +103,7 @@ def user_context() -> dict:
     }
 
 
-def top_expsenses() -> dict:
+def top_expenses() -> dict:
     """Returns a dictionary with the following structure:
     top_expenses: [
         {
@@ -131,6 +118,9 @@ def top_expsenses() -> dict:
     categories = {}
     category_ids = {}
     for txn in transactions:
+        if txn.amount > 0:
+            continue
+
         if txn.category_id not in category_ids:
             category_ids[txn.category_id] = crud_category.get_category_by_id(
                 txn.category_id
@@ -140,8 +130,7 @@ def top_expsenses() -> dict:
         if category not in categories:
             categories[category] = 0.0
 
-        if txn.amount < 0:
-            categories[category] += abs(txn.amount)
+        categories[category] += abs(txn.amount)
 
     return {
         "top_expenses": sorted(
@@ -189,28 +178,6 @@ def budget_status() -> dict:
         c.id: c.name for c in crud_category.get_categories_by_user(session["user_id"])
     }
 
-    # If there are leq 5 categories, nothing fancy is needed
-    # Sort and return the data
-    if len(category_buckets) <= 5:
-        return {
-            "budget_status": sorted(
-                [
-                    {
-                        "category": categories.get(b.category_id, "Unknown"),
-                        "percentage": int(
-                            math.ceil(
-                                category_buckets.get(b.category_id, 0) / b.amount * 100
-                            )
-                        ),
-                        "status_color": "success",
-                    }
-                    for b in budgets
-                ],
-                key=lambda x: x["percentage"],
-                reverse=True,
-            )
-        }
-
     # https://docs.python.org/3/library/heapq.html
     # "Heap elements can be tuples. This is useful for assigning comparison
     # values (such as task priorities) alongside the main record being tracked"
@@ -228,10 +195,11 @@ def budget_status() -> dict:
     while budget_status_ and len(display_list) < 5:
         neg_percentage, category = heapq.heappop(budget_status_)
 
-        # Skip categories that are exactly 100% spent
         if -neg_percentage == 100:
-            num_overbudget += 1
+            # Skip categories that are exactly 100% spent
             continue
+        elif -neg_percentage > 100:
+            num_overbudget += 1
 
         display_list.append(
             {
@@ -250,72 +218,25 @@ def spending_chart() -> dict:
         spending_chart (string html)
     }
     """
+    return {"spending_chart": "<pre>Contents</pre>"}
 
-    # Generate mock data
-    end_date = datetime.datetime.now()
-    dates_12m = pd.date_range(end=end_date, periods=12, freq="ME")
-    spending_12m = [random.randint(500, 1500) for _ in range(12)]
 
-    # Create DataFrame
-    df = pd.DataFrame({"Date": dates_12m, "Spending": spending_12m})
-
-    # Create traces for 3, 6, and 12 months
-    trace_3m = go.Scatter(
-        x=df["Date"][-3:], y=df["Spending"][-3:], mode="lines+markers", name="3 Months"
-    )
-    trace_6m = go.Scatter(
-        x=df["Date"][-6:], y=df["Spending"][-6:], mode="lines+markers", name="6 Months"
-    )
-    trace_12m = go.Scatter(
-        x=df["Date"], y=df["Spending"], mode="lines+markers", name="12 Months"
-    )
-
-    # Create layout
-    layout = go.Layout(
-        title="Monthly Spending Over Time",
-        xaxis=dict(title="Date"),
-        yaxis=dict(title="Spending ($)"),
-        legend=dict(x=0, y=1.1, orientation="h"),
-        updatemenus=[
-            dict(
-                type="buttons",
-                direction="right",
-                active=2,
-                x=0.57,
-                y=1.2,
-                buttons=list(
-                    [
-                        dict(
-                            label="3 Months",
-                            method="update",
-                            args=[
-                                {"visible": [True, False, False]},
-                                {"title": "Monthly Spending - Last 3 Months"},
-                            ],
-                        ),
-                        dict(
-                            label="6 Months",
-                            method="update",
-                            args=[
-                                {"visible": [False, True, False]},
-                                {"title": "Monthly Spending - Last 6 Months"},
-                            ],
-                        ),
-                        dict(
-                            label="12 Months",
-                            method="update",
-                            args=[
-                                {"visible": [False, False, True]},
-                                {"title": "Monthly Spending - Last 12 Months"},
-                            ],
-                        ),
-                    ]
-                ),
-            )
-        ],
-    )
-
-    fig = go.Figure(data=[trace_3m, trace_6m, trace_12m], layout=layout)
-    print(fig.to_html(full_html=False, include_plotlyjs="cdn"))
-
-    return {"spending_chart": fig.to_html(full_html=False, include_plotlyjs="cdn")}
+def saving_goals() -> dict:
+    """Returns a dictionary with the following structure:
+    {
+        goals: [
+            {
+                name (string)
+                target_amount (float)
+                current_amount (float)
+            },
+            ...
+        ]
+    }
+    """
+    return {
+        "goals": [
+            goal.model_dump()
+            for goal in crud_goal.get_goals_by_user(session["user_id"])
+        ]
+    }
