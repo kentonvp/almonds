@@ -32,6 +32,7 @@ jobs:
         name: coverage-data
         path: .coverage
         if-no-files-found: ignore
+        include-hidden-files: true
 
   coverage:
     name: Combine and check coverage
