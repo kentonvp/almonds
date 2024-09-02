@@ -1,5 +1,326 @@
-{% extends 'base.html' %} {% block head_scripts %} {%endblock head_scripts%} {%
-block title %} {% endblock title %} {% block header %} {% endblock header %} {%
-block content %}
-<h1>Goals</h1>
-{% endblock content %} {% block body_scripts %} {%endblock body_scripts%}
+{% extends 'base.html' %}
+
+{% block head_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+{% endblock head_scripts %}
+
+{% block title %}
+{{ title }}
+{% endblock title %}
+
+{% block header %} {% endblock header %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="row align-items-center mb-4">
+    <div class="col">
+      <h1>Goals</h1>
+    </div>
+    <!-- Add Goal Button -->
+    <div class="col text-end">
+      <button
+        type="button"
+        class="btn btn-success mb-4"
+        data-bs-toggle="modal"
+        data-bs-target="#addGoalModal">
+        Add New Savings Goal
+      </button>
+    </div>
+  </div>
+
+  <!-- Goals Table -->
+  <table class="table table-striped table-hover">
+    <thead>
+      <tr>
+        <th class="text-center">
+          <button class="btn btn-link text-decoration-none" data-sort="name">
+            Goal Name <i class="bi bi-arrow-down-up"></i>
+          </button>
+        </th>
+        <th class="text-center">
+          <button class="btn btn-link text-decoration-none" data-sort="current_amount">
+            Current Amount <i class="bi bi-arrow-down-up"></i>
+          </button>
+        </th>
+        <th class="text-center">
+          <button class="btn btn-link text-decoration-none" data-sort="target_amount">
+            Target Amount <i class="bi bi-arrow-down-up"></i>
+          </button>
+        </th>
+        <th class="text-center">
+          <button class="btn btn-link text-decoration-none" data-sort="progress">
+            Progress <i class="bi bi-arrow-down-up"></i>
+          </button>
+        </th>
+        <th class="text-center">
+          <button class="btn btn-link text-decoration-none" data-sort="deadline">
+            Deadline <i class="bi bi-arrow-down-up"></i>
+          </button>
+        </th>
+        <th class="text-center">
+          <button class="btn btn-link text-decoration-none" data-sort="status">
+            Status <i class="bi bi-arrow-down-up"></i>
+          </button>
+        </th>
+        <th class="text-center">Actions</th>
+      </tr>
+    </thead>
+    <tbody id="goals-table-body">
+      {% for goal in goals %}
+      <tr>
+        <td class="text-center">{{ goal.name }}</td>
+        <td class="text-center">{{ goal.current_amount | format_currency }}</td>
+        <td class="text-center">{{ goal.target_amount | format_currency }}</td>
+        <td class="text-center">
+          {% set progress = (goal.current_amount / goal.target_amount * 100) | round | int %}
+          <div class="progress">
+            <div class="progress-bar bg-success"
+                 role="progressbar" 
+                 style="width: {{ progress }}%" 
+                 aria-valuenow="{{ progress }}" 
+                 aria-valuemin="0" 
+                 aria-valuemax="100">{{ progress }}%</div>
+          </div>
+        </td>
+        <td class="text-center">{{ goal.deadline | format_date }}</td>
+        <td class="text-center">{{ goal.status }}</td>
+        <td class="text-center">
+          <button
+            type="button"
+            class="btn btn-outline-primary btn-sm edit-goal"
+            data-bs-toggle="modal"
+            data-bs-target="#editGoalModal"
+            data-id="{{ goal.id }}">
+            Edit
+          </button>
+          <button
+            type="button"
+            class="btn btn-outline-danger btn-sm delete-goal"
+            data-id="{{ goal.id }}">
+            Delete
+          </button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- Add Goal Modal -->
+  <div class="modal fade" id="addGoalModal" tabindex="-1" aria-labelledby="addGoalModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addGoalModalLabel">Add New Goal</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="add-goal-form" action="{{ url_for('goal.create_goal') }}" method="POST">
+            <div class="mb-3">
+              <label for="add-goal-name" class="form-label">Goal Name</label>
+              <input type="text" class="form-control" id="add-goal-name" name="goal-name" autocomplete="off" required>
+            </div>
+            <div class="mb-3">
+              <label for="add-goal-target-amount" class="form-label">Target Amount</label>
+              <input type="number" class="form-control" id="add-goal-target-amount" name="target-amount" step="0.01" required>
+            </div>
+            <div class="mb-3">
+              <label for="add-goal-current-amount" class="form-label">Current Amount</label>
+              <input type="number" class="form-control" id="add-goal-current-amount" name="current-amount" step="0.01" value="0.00">
+            </div>
+            <div class="mb-3">
+              <label for="add-goal-deadline" class="form-label">Deadline</label>
+              <input type="date" class="form-control" id="add-goal-deadline" name="deadline">
+            </div>
+            <div class="mb-3">
+              <label for="add-goal-status" class="form-label">Status</label>
+              <select class="form-select" id="add-goal-status" name="status">
+                <option value="Not Started">Not Started</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+              </select>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" form="add-goal-form" class="btn btn-primary">Save Goal</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Goal Modal -->
+  <div class="modal fade" id="editGoalModal" tabindex="-1" aria-labelledby="editGoalModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editGoalModalLabel">Edit Goal</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="edit-goal-form" action="{{ url_for('goal.update_goal') }}" method="POST">
+            <div class="mb-3">
+              <label for="edit-goal-name" class="form-label">Goal Name</label>
+              <input type="text" class="form-control" id="edit-goal-name" name="goal-name" required>
+            </div>
+            <div class="mb-3">
+              <label for="edit-goal-target-amount" class="form-label">Target Amount</label>
+              <input type="number" class="form-control" id="edit-goal-target-amount" name="goal-target-amount" step="0.01" required>
+            </div>
+            <div class="mb-3">
+              <label for="edit-goal-current-amount" class="form-label">Current Amount</label>
+              <input type="number" class="form-control" id="edit-goal-current-amount" name="goal-current-amount" step="0.01" value="0.00">
+            </div>
+            <div class="mb-3">
+              <label for="edit-goal-deadline" class="form-label
+                          ">Deadline</label>
+              <input type="date" class="form-control" id="edit-goal-deadline" name="goal-deadline">
+            </div>
+            <div class="mb-3">
+              <label for="edit-goal-status" class="form-label">Status</label>
+              <select class="form-select" id="edit-goal-status" name="goal-status">
+                <option value="Not Started">Not Started</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+              </select>
+            </div>
+            <input type="hidden" id="edit-goal-id" name="goal-id">
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" form="edit-goal-form" class="btn btn-primary">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock content %}
+
+{% block body_scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const editButtons = document.querySelectorAll('.edit-goal');
+    editButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const goalId = this.getAttribute('data-id');
+        // Fetch goal data from the server using the ID
+        fetch(
+          "{{ url_for('goal.get_goal') }}", 
+          {
+            body: JSON.stringify({goal_id: goalId}),
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'}
+          }
+        )
+          .then(response => response.json())
+          .then(data => {
+            // Populate the edit modal with the fetched data
+            document.getElementById('edit-goal-id').value = goalId;
+            document.getElementById('edit-goal-name').value = data.name;
+            document.getElementById('edit-goal-current-amount').value = data.current_amount;
+            document.getElementById('edit-goal-target-amount').value = data.target_amount;
+            document.getElementById('edit-goal-deadline').value = data.deadline_datestr;
+            document.getElementById('edit-goal-status').value = data.status;
+            
+            // Show the edit modal
+            const editModal = new bootstrap.Modal(document.getElementById('editGoalModal'));
+            editModal.show();
+          });
+      });
+    });
+  });
+
+  // Delete goal
+  const deleteButtons = document.querySelectorAll('.delete-goal');
+  deleteButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const goalId = this.getAttribute('data-id');
+      if (confirm('Are you sure you want to delete this goal?')) {
+        fetch("{{ url_for('goal.delete_goal') }}", {
+          body: JSON.stringify({goal_id: goalId}),
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'}
+        })
+        .then(response => {
+          if (response.ok) {
+            // Remove the row from the table
+            this.closest('tr').remove();
+          } else {
+            alert('Failed to delete the goal. Please try again.');
+          }
+        });
+      }
+    });
+  });
+
+  // Sorting functionality
+  document.addEventListener('DOMContentLoaded', function() {
+    const tableBody = document.getElementById('goals-table-body');
+    const sortButtons = document.querySelectorAll('[data-sort]');
+    let currentSort = { column: 'progress', direction: 'desc', first: true };
+
+    function sortTable(column) {
+      if (currentSort.first) {
+        currentSort.first = false;
+      } else if (currentSort.column === column) {
+        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+      } else {
+        currentSort.column = column;
+        currentSort.direction = 'asc';
+      }
+
+      updateSortIndicators();
+      
+      const rows = Array.from(tableBody.querySelectorAll('tr'));
+      rows.sort((a, b) => {
+        let aValue = a.children[getColumnIndex(column)].textContent.trim();
+        let bValue = b.children[getColumnIndex(column)].textContent.trim();
+
+        if (['target_amount', 'current_amount', 'progress'].includes(column)) {
+          aValue = parseFloat(aValue.replace(/[^0-9.-]+/g, ""));
+          bValue = parseFloat(bValue.replace(/[^0-9.-]+/g, ""));
+        } else if (column === 'deadline') {
+          aValue = parseFloat(aValue);
+          bValue = parseFloat(bValue);
+        }
+
+        if (aValue < bValue)
+          return currentSort.direction === 'asc' ? -1 : 1;
+        if (aValue > bValue)
+          return currentSort.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+      rows.forEach(row => tableBody.appendChild(row));
+    }
+
+    function getColumnIndex(column) {
+      const columnMap = {
+        'name': 0,
+        'target_amount': 1,
+        'current_amount': 2,
+        'progress': 3,
+        'deadline': 4,
+        'status': 5
+      };
+      return columnMap[column];
+    }
+
+    function updateSortIndicators() {
+      sortButtons.forEach(button => {
+        const icon = button.querySelector('i');
+        if (button.dataset.sort === currentSort.column) {
+          icon.className = currentSort.direction === 'asc' ? 'bi bi-arrow-up' : 'bi bi-arrow-down';
+        } else {
+          icon.className = 'bi bi-arrow-down-up';
+        }
+      });
+    }
+
+    sortButtons.forEach(button => {
+      button.addEventListener('click', () => sortTable(button.dataset.sort));
+    });
+
+    // Initial sort
+    sortTable('progress');
+  });
+</script>
+{% endblock body_scripts %}
