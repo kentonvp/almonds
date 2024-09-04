@@ -54,7 +54,7 @@ def get_goal():
 def create_goal():
     c_goal = GoalBase(
         user_id=session["user_id"],
-        name=request.form["name"],
+        name=request.form["goal-name"],
         target_amount=float(request.form["target-amount"]),
         current_amount=float(request.form["current-amount"]),
         deadline=datetime.datetime.strptime(request.form["deadline"], "%Y-%m-%d"),
