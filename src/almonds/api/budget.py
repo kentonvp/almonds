@@ -1,5 +1,6 @@
 import datetime
 import math
+import time
 from uuid import UUID
 
 from flask import (
@@ -27,7 +28,8 @@ def view():
     if "username" not in session:
         return redirect(url_for("root.view"))
 
-    budgets_ = crud_budget.get_budgets_by_user_id(session["user_id"])
+    budgets = crud_budget.get_budgets_by_user_id(session["user_id"])
+    budget_categories = set(b.category_id for b in budgets)
 
     transactions = crud_transaction.get_transactions_by_month(session["user_id"])
 
@@ -35,35 +37,49 @@ def view():
         c.id: c.name for c in crud_category.get_categories_by_user(session["user_id"])
     }
 
-    budgets = []
-    for b in budgets_:
-        # Add transaction amounts to budget
-        category = categories[b.category_id]
-        spent = sum(
-            -transaction.amount
-            for transaction in transactions
-            if transaction.category_id == b.category_id
-        )
+    stime = time.perf_counter_ns()
 
-        # Add percentage and status_color
-        percentage = round(spent / b.amount * 100, 2)
-        status_color = ui.budget_color(percentage)
+    # Pre-calculate spent amounts per category
+    spent_by_category = dict[int, float]()
+    untracked_spend = 0
 
-        budgets.append(
+    for txn in transactions:
+        if txn.category_id in budget_categories:
+            if txn.category_id not in spent_by_category:
+                spent_by_category[txn.category_id] = 0.0
+
+            spent_by_category[txn.category_id] -= txn.amount
+        elif txn.amount < 0:
+            untracked_spend -= txn.amount
+
+    # Process budgets
+    processed_budgets = []
+    for budget in budgets:
+        category = categories[budget.category_id]
+        spent = spent_by_category.get(budget.category_id, 0.0)
+        percentage = round((spent / budget.amount) * 100, 2)
+
+        processed_budgets.append(
             {
-                "id": b.id,
+                "id": budget.id,
                 "category": category,
-                "amount": b.amount,
+                "amount": budget.amount,
                 "spent": spent,
                 "percentage": int(math.ceil(percentage)),
-                "status_color": status_color,
+                "status_color": ui.budget_color(percentage),
             }
         )
+
+    print(f"Took {time.perf_counter_ns() - stime}ns to process budgets")
 
     categories = [{"id": cid, "name": name} for cid, name in categories.items()]
 
     return render_template(
-        "budget.html", budgets=budgets, categories=categories, **build_context()
+        "budget.html",
+        budgets=processed_budgets,
+        categories=categories,
+        untracked_spend=untracked_spend,
+        **build_context(),
     )
 
 
