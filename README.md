@@ -1,5 +1,42 @@
 # almonds
+
 Personal Finance App
+
+
+## Project Setup
+
+1. Copy `example.env` to `.env` and populate
+```bash
+$ cp example.env .env
+```
+
+2. Make virtual environment
+```bash
+$ python -m venv .venv
+```
+
+3. Activate virtual environment
+```bash
+$ source .venv/bin/activate
+```
+
+4. Install dependencies
+```bash
+$ pip install '.[dev]'
+```
+
+5. (optional) Migrate database if necessary. Look in `src/almonds/sql/` for migration scripts.
+```bash
+$ sqlite3 almonds.db < src/almonds/sql/file.sql
+```
+
+6. Run the app
+```bash
+$ make app
+```
+
+7. Open in a browser: `http://127.0.0.1:5000`
+
 
 ![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/kentonvp/1476a6d310cc0e6ecc9943e3411830b7/raw/covbadge.json)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
