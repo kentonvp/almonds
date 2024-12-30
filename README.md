@@ -7,32 +7,32 @@ Personal Finance App
 
 1. Copy `example.env` to `.env` and populate
 ```bash
-cp example.env .env
+$ cp example.env .env
 ```
 
 2. Make virtual environment
 ```bash
-python -m venv .venv
+$ python -m venv .venv
 ```
 
 3. Activate virtual environment
 ```bash
-source .venv/bin/activate
+$ source .venv/bin/activate
 ```
 
 4. Install dependencies
 ```bash
-pip install '.[dev]'
+$ pip install '.[dev]'
 ```
 
 5. (optional) Migrate database if necessary. Look in `src/almonds/sql/` for migration scripts.
 ```bash
-sqlite3 almonds.db < src/almonds/sql/file.sql
+$ sqlite3 almonds.db < src/almonds/sql/file.sql
 ```
 
 6. Run the app
 ```bash
-make app
+$ make app
 ```
 
 7. Open in a browser: `http://127.0.0.1:5000`
