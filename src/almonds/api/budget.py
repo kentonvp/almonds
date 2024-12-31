@@ -41,7 +41,7 @@ def view():
 
     # Pre-calculate spent amounts per category
     spent_by_category = dict[int, float]()
-    untracked_spend = 0
+    untracked_transactions = []
 
     for txn in transactions:
         if txn.category_id in budget_categories:
@@ -50,7 +50,9 @@ def view():
 
             spent_by_category[txn.category_id] -= txn.amount
         elif txn.amount < 0:
-            untracked_spend -= txn.amount
+            untracked_transactions.append(
+                txn.model_dump() | {"category": categories[txn.category_id]}
+            )
 
     # Process budgets
     processed_budgets = []
@@ -78,7 +80,7 @@ def view():
         "budget.html",
         budgets=processed_budgets,
         categories=categories,
-        untracked_spend=untracked_spend,
+        untracked_transactions=untracked_transactions,
         **build_context(),
     )
 

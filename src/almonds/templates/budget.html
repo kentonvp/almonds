@@ -27,6 +27,37 @@
     </div>
   </div>
 
+  <!-- Untracked Spending -->
+  <h5 class="card-title">Untracked Transactions</h5>
+  <table class="table table-striped table-hover">
+    <thead>
+      <tr>
+        <th class="text-center">
+          Category
+        </th>
+        <th class="text-center">
+          Amount
+        </th>
+        <th class="text-center">
+          Description
+        </th>
+        <th class="text-center">
+          Date
+        </th>
+      </tr>
+    </thead>
+    <tbody id="budget-table-body">
+      {% for txn in untracked_transactions %}
+      <tr>
+        <td class="text-center">{{ txn.category }}</td>
+        <td class="text-center">{{ txn.amount | format_currency }}</td>
+        <td class="text-center">{{ txn.description }}</td>
+        <td class="text-center">{{ txn.datetime | format_date }} </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
   <!-- Budget Table -->
   <table class="table table-striped table-hover">
     <thead>
@@ -89,6 +120,15 @@
       </tr>
       {% endfor %}
     </tbody>
+    <tfoot>
+      <tr class="table-active font-weight-bold">
+        <td class="text-center">Totals</td>
+        <td class="text-center">{{ budgets | sum(attribute='spent') | format_currency }}</td>
+        <td class="text-center">{{ budgets | sum(attribute='amount') | format_currency }}</td>
+        <td></td>
+        <td></td>
+      </tr>
+    </tfoot>
   </table>
 
   <!-- Edit Budget Modal -->
