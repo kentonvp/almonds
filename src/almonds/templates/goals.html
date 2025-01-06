@@ -13,7 +13,7 @@
 
 {% block content %}
 <div class="container mt-4">
-  <div class="row align-items-center mb-4">
+  <div class="row align-text-center mb-4">
     <div class="col">
       <h1>Goals</h1>
     </div>
@@ -107,12 +107,23 @@
   </table>
 
   <!-- Add Goal Modal -->
-  <div class="modal fade" id="addGoalModal" tabindex="-1" aria-labelledby="addGoalModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+  <div
+    class="modal fade"
+    id="addGoalModal"
+    tabindex="-1"
+    aria-labelledby="addGoalModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="addGoalModalLabel">Add New Goal</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <h3 class="modal-title" id="addGoalModalLabel">Add New Goal</h3>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
         </div>
         <div class="modal-body">
           <form id="add-goal-form" action="{{ url_for('goal.create_goal') }}" method="POST">
@@ -150,12 +161,23 @@
   </div>
 
   <!-- Edit Goal Modal -->
-  <div class="modal fade" id="editGoalModal" tabindex="-1" aria-labelledby="editGoalModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+  <div
+    class="modal fade"
+    id="editGoalModal"
+    tabindex="-1"
+    aria-labelledby="editGoalModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="editGoalModalLabel">Edit Goal</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <h3 class="modal-title" id="editGoalModalLabel">Edit Goal</h3>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
         </div>
         <div class="modal-body">
           <form id="edit-goal-form" action="{{ url_for('goal.update_goal') }}" method="POST">
@@ -198,6 +220,9 @@
 {% block body_scripts %}
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    // Initialize a modal only once
+    const editModal = new bootstrap.Modal(document.getElementById('editGoalModal'));
+
     const editButtons = document.querySelectorAll('.edit-goal');
     editButtons.forEach(button => {
       button.addEventListener('click', function() {
@@ -222,10 +247,19 @@
             document.getElementById('edit-goal-status').value = data.status;
             
             // Show the edit modal
-            const editModal = new bootstrap.Modal(document.getElementById('editGoalModal'));
             editModal.show();
           });
       });
+    });
+
+    // Add proper cleanup when modal is hidden
+    document.getElementById('editGoalModal').addEventListener('hidden.bs.modal', function () {
+      e.preventDefault();
+
+      // Optional: Clear form data here if needed
+
+      const modal = boostrap.Modal.getInstance(document.getElementById('editGoalModal'));
+      modal.hide();
     });
   });
 

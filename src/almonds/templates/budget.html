@@ -11,7 +11,7 @@
 
 {% block content %}
 <div class="container mt-4">
-  <div class="row align-items-center mb-4">
+  <div class="row align-text-center mb-4">
     <div class="col">
       <h1>Budget</h1>
     </div>
@@ -92,12 +92,24 @@
   </table>
 
   <!-- Edit Budget Modal -->
-  <div class="modal fade" id="editBudgetModal" tabindex="-1" aria-labelledby="editBudgetModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+  <div
+    class="modal fade"
+    id="editBudgetModal"
+    tabindex="-1"
+    data-bs-keyboard="false"
+    aria-labelledby="editBudgetModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="editBudgetModalLabel">Edit Budget</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <h3 class="modal-title" id="editBudgetModalLabel">Edit Budget</h3>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
         </div>
         <div class="modal-body">
           <form id="edit-budget-form" action="{{ url_for('budget.update_budget') }}" method="POST">
@@ -131,17 +143,15 @@
     class="modal fade"
     id="addBudgetModal"
     tabindex="-1"
-    data-bs-backdrop="static"
-    data-bs-keyboard="false"
     aria-labelledby="addBudgetModalLabel"
     aria-hidden="true"
   >
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="addBudgetModalLabel">
+          <h3 class="modal-title" id="addBudgetModalLabel">
             Add New Budget
-          </h5>
+          </h3>
           <button
             type="button"
             class="btn-close"
@@ -179,6 +189,9 @@
 {% block body_scripts %}
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    // Initialize a modal only once
+    const editModal = new bootstrap.Modal(document.getElementById('editBudgetModal'));
+
     const editButtons = document.querySelectorAll('.edit-budget');
     editButtons.forEach(button => {
       button.addEventListener('click', function() {
@@ -199,12 +212,21 @@
             document.getElementById('edit-budget-category').value = data.category;
             document.getElementById('edit-budget-category-id').value = data.category_id;
             document.getElementById('edit-budget-amount').value = Math.abs(data.amount);
-            
+
             // Show the edit modal
-            const editModal = new bootstrap.Modal(document.getElementById('editBudgetModal'));
             editModal.show();
           });
       });
+    });
+
+    // Add proper cleanup when modal is hidden
+    document.getElementById('editBudgetModal').addEventListener('hidden.bs.modal', function () {
+      e.preventDefault();
+
+      // Optional: Clear form data here if needed
+
+      const modal = boostrap.Modal.getInstance(document.getElementById('editBudgetModal'));
+      modal.hide();
     });
   });
 
