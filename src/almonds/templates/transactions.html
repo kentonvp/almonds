@@ -21,8 +21,7 @@
         type="button"
         class="btn btn-success"
         data-bs-toggle="modal"
-        data-bs-target="#addTransactionModal"
-      >
+        data-bs-target="#addTransactionModal">
         Add New Transaction
       </button>
     </div>
@@ -163,17 +162,15 @@
     class="modal fade"
     id="addTransactionModal"
     tabindex="-1"
-    data-bs-backdrop="static"
-    data-bs-keyboard="false"
     aria-labelledby="addTransactionModalLabel"
     aria-hidden="true"
   >
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h1 class="modal-title" id="addTransactionModalLabel">
+          <h3 class="modal-title" id="addTransactionModalLabel">
             Add New Transaction
-          </h1>
+          </h3>
           <button
             type="button"
             class="btn-close"
@@ -263,13 +260,26 @@
       </div>
     </div>
   </div>
+
   <!-- Edit Transaction Modal -->
-  <div class="modal fade" id="editTransactionModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="editTransactionModalLabel" aria-hidden="true">
+  <div
+    class="modal fade"
+    id="editTransactionModal"
+    tabindex="-1"
+    data-bs-keyboard="false"
+    aria-labelledby="editTransactionModalLabel"
+    aria-hidden="true"
+  >
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h1 class="modal-title" id="editTransactionModalLabel">Edit Transaction</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <h3 class="modal-title" id="editTransactionModalLabel">Edit Transaction</h3>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
         </div>
         <div class="modal-body">
           <form id="edit-transaction-form" action="{{ url_for('transactions.update_transaction') }}" method="POST">
@@ -318,6 +328,9 @@
 {% block body_scripts %}
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    // Initialize a modal only once
+    const editModal = new bootstrap.Modal(document.getElementById('editTransactionModal'));
+
     const editButtons = document.querySelectorAll('.edit-transaction');
     editButtons.forEach(button => {
       button.addEventListener('click', function() {
@@ -344,12 +357,21 @@
             } else {
               document.getElementById('edit-expense').checked = true;
             }
-            
+
             // Show the edit modal
-            const editModal = new bootstrap.Modal(document.getElementById('editTransactionModal'));
             editModal.show();
           });
       });
+    });
+
+    // Add proper cleanup when modal is hidden
+    document.getElementById('editTransactionModal').addEventListener('hidden.bs.modal', function () {
+      e.preventDefault();
+
+      // Optional: Clear form data here if needed
+
+      const modal = boostrap.Modal.getInstance(document.getElementById('editTransactionModal'));
+      modal.hide();
     });
   });
 
