@@ -21,7 +21,8 @@ def test_format_currency():
     # Test positive numbers
     assert format_currency(10.5) == "$10.50"
     assert format_currency(0.01) == "$0.01"
-    assert format_currency(1000000.00) == "$1000000.00"
+    assert format_currency(1000000.00) == "$1,000,000.00"
+    assert format_currency(-1000000.00) == "-$1,000,000.00"
 
     # Test negative numbers
     assert format_currency(-10.5) == "-$10.50"
@@ -35,4 +36,5 @@ def test_format_currency():
     assert format_currency(10.504) == "$10.50"
 
     # Test large numbers
-    assert format_currency(1234567.89) == "$1234567.89"
+    assert format_currency(1234567.89) == "$1,234,567.89"
+    assert format_currency(-1234567.89) == "-$1,234,567.89"
