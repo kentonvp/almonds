@@ -1,3 +1,4 @@
+# flake8: noqa
 # isort: skip_file
 
 from almonds.db.database import Base, engine
@@ -9,3 +10,4 @@ from almonds.models.category import Category
 from almonds.models.goal import Goal
 from almonds.models.transaction import Transaction
 from almonds.models.user import User
+from almonds.models.plaid_item import PlaidItem

@@ -12,7 +12,7 @@
       return linkToken;
     };
 
-    // Initialize Link
+    // Initialize Link.
     const handler = Plaid.create({
       token: await createLinkToken(),
       onSuccess: async (publicToken, metadata) => {
@@ -35,14 +35,64 @@
     });
 
     // Start Link when button is clicked
-    const linkAccountButton = document.getElementById("link-account");
+    const linkAccountButton = document.getElementById("link-account-btn");
     linkAccountButton.addEventListener("click", (event) => {
       handler.open();
     });
   })(jQuery);
+
+  // Unlink items from account
+  document.addEventListener('DOMContentLoaded', function() {
+  // Get all unlink buttons
+  const unlinkButtons = document.querySelectorAll('.unlink-account-btn');
+  
+  // Add click handler to each button
+  unlinkButtons.forEach(button => {
+    button.addEventListener('click', async function() {
+      const itemId = this.getAttribute('data-item-id');
+      
+      try {
+        const response = await fetch("{{ url_for('plaid.delete_access_token') }}", {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            id: itemId
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to unlink account');
+        }
+
+        // Refresh the page or update UI as needed
+        window.location.reload();
+      } catch (error) {
+        console.error('Error unlinking account:', error);
+        alert('Failed to unlink account. Please try again.');
+      }
+    });
+  });
+});
 </script>
-{% endblock head_scripts %} {% block content %}
-<button id="link-account">
-  <strong>Link account</strong>
+{% endblock head_scripts %}
+
+{% block content %}
+<button id="link-account-btn">
+  <strong>Link New Account</strong>
 </button>
+
+{% for item in plaid_items %}
+<p id="debug-display" class="alert alert-warning mt-3 mb-3" role="alert">
+  <strong>{{ item.institution_name }}</strong>
+  {{ item.created_at | format_date }}
+  <button
+    class="unlink-account-btn"
+    data-item-id="{{ item.id }}">
+    Unlink
+  </button>
+</p>
+{% endfor %}
 {% endblock content %}
+
