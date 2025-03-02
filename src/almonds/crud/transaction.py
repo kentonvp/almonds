@@ -54,7 +54,7 @@ def get_transactions_by_user(
     *,
     limit: int = 500,
     offset=0,
-    sessionmaker: sessionmaker_ = SessionLocal
+    sessionmaker: sessionmaker_ = SessionLocal,
 ) -> list[Transaction]:
     with sessionmaker() as session:
         stmt = (
@@ -106,9 +106,9 @@ def delete_transaction(
 
 def get_transactions_by_month(
     user_id: UUID,
-    today: datetime.date = None,
+    today: datetime.date | None = None,
     *,
-    sessionmaker: sessionmaker_ = SessionLocal
+    sessionmaker: sessionmaker_ = SessionLocal,
 ) -> list[Transaction]:
     if today is None:
         # For testing purposes, we allow to pass a specific date
@@ -129,7 +129,7 @@ def count_transactions_by_month(
     user_id: UUID,
     today: datetime.date = None,
     *,
-    sessionmaker: sessionmaker_ = SessionLocal
+    sessionmaker: sessionmaker_ = SessionLocal,
 ) -> int:
     if today is None:
         # For testing purposes, we allow to pass a specific date
