@@ -82,16 +82,13 @@ def mock_plaid_client(monkeypatch):
 
 
 @pytest.fixture
-def mock_redirect_uri(monkeypatch):
-    monkeypatch.setenv("PLAID_SANDBOX_REDIRECT_URI", "https://127.0.0.1:5000/oath")
-
-
-@pytest.fixture
 def sample_user_id():
     return UUID("12345678-1234-5678-1234-567812345678")
 
 
-def test_create_link_token(mock_plaid_client, mock_redirect_uri, sample_user_id):
+def test_create_link_token(mock_plaid_client, sample_user_id, monkeypatch):
+    monkeypatch.setenv("PLAID_SANDBOX_REDIRECT_URI", "https://127.0.0.1:5000/oath")
+
     # Act
     result = create_link_token(sample_user_id)
 
@@ -125,16 +122,20 @@ def test_get_balance(mock_plaid_client):
     assert result["accounts"][0]["balances"]["current"] == 110.00
 
 
-def test_sync_transactions(mock_plaid_client):
+def test_sync_transactions(mock_plaid_client, monkeypatch):
+    monkeypatch.setenv("ALMONDS_ENVIRONMENT", "sandbox")
+
     # Arrange
     access_token = "access-sandbox-12345"
 
     # Act
     result = sync_transactions(access_token)
+    print(result)
 
     # Assert
-    assert len(result) == 3
-    assert [tx["transaction_id"] for tx in result] == ["1", "2", "3"]
+    assert len(result["added"]) == 2
+    assert len(result["modified"]) == 1
+    assert len(result["removed"]) == 1
 
 
 def test_get_item(mock_plaid_client):

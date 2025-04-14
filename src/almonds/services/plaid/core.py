@@ -12,6 +12,7 @@ from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUse
 from plaid.model.products import Products
 from plaid.model.transactions_sync_request import TransactionsSyncRequest
 
+from almonds import config
 from almonds.services.plaid.client import client
 
 
@@ -54,7 +55,9 @@ def sync_transactions(access_token: str, *, cursor: str | None = None) -> dict:
     # while incrementing the cursor to retrieve all transactions
     while has_more:
         req = TransactionsSyncRequest(
-            access_token=access_token, cursor=transactions["cursor"]
+            access_token=access_token,
+            cursor=transactions["cursor"],
+            _check_type=config.ALMONDS_ENV,
         )
         resp = client.transactions_sync(req)
 
