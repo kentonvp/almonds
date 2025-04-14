@@ -1,7 +1,9 @@
-import os
+from uuid import UUID
 
-from flask import Blueprint, request, session, url_for
+from flask import Blueprint, request, session
 
+from almonds.crud import plaid_item as crud_plaid_item
+from almonds.schemas.plaid_item import PlaidItemBase
 from almonds.services.plaid import core
 
 plaid_bp = Blueprint("plaid", __name__)
@@ -9,7 +11,10 @@ plaid_bp = Blueprint("plaid", __name__)
 
 @plaid_bp.route("/createLinkToken")
 def create_link_token():
-    link_token = core.create_link_token()
+    user_id = (session.get("user_id", None),)
+    if user_id is None:
+        return {"error": "user_id not set"}
+    link_token = core.create_link_token(user_id)
     return {"link_token": link_token}
 
 
@@ -21,9 +26,13 @@ def exchange_public_token():
     body = request.get_json()
     resp = core.exchange_public_token(body["public_token"])
 
-    # Store to session cookie
-    session["access_token"] = resp["access_token"]
-    session["item_id"] = resp["item_id"]
+    item = PlaidItemBase(
+        user_id=session["user_id"],
+        access_token=resp["access_token"],
+        item_id=resp["item_id"],
+    )
+    print(f"Plaid Item: {item}")
+    crud_plaid_item.create_item(item)
 
     return {"public_token_exchange": "complete"}
 
@@ -31,3 +40,12 @@ def exchange_public_token():
 @plaid_bp.route("/isConnected")
 def is_account_connected():
     return {"status": "access_token" in session}
+
+
+@plaid_bp.route("/unlinkAccount", methods=["DELETE"])
+def delete_access_token():
+    body = request.get_json()
+    item_id = UUID(body["id"])
+    crud_plaid_item.delete_item(item_id)
+
+    return {"status": "deleted"}

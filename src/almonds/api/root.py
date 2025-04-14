@@ -6,7 +6,9 @@ from flask import Blueprint, redirect, render_template, session, url_for
 import almonds.crud.budget as crud_budget
 import almonds.crud.category as crud_category
 import almonds.crud.goal as crud_goal
+import almonds.crud.plaid_item as crud_plaid_item
 import almonds.crud.transaction as crud_transaction
+from almonds.services.plaid import core
 from almonds.utils import ui
 
 root = Blueprint("root", __name__)
@@ -39,8 +41,18 @@ def settings():
     if "username" not in session:
         return redirect(url_for("root.view"))
 
+    items = crud_plaid_item.get_items_for_user(session["user_id"])
+    updated_items = []
+    for it in items:
+        item_info = core.get_item(it.access_token.get_secret_value())
+        updated_items.append(
+            it.model_dump() | {"institution_name": item_info["institution_name"]}
+        )
+
     context = build_context()
-    return render_template("settings.html", current_page="settings", **context)
+    return render_template(
+        "settings.html", current_page="settings", plaid_items=updated_items, **context
+    )
 
 
 @root.route("/plaidLogin")

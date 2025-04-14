@@ -1,7 +1,7 @@
 [project]
 name = "almonds"
 version = "0.1.0"
-description = "just your affordable, personal finance app."
+description = "just your affordable, personal finance app"
 authors = [{name="kentonvp", email= "kentonvanp@gmail.com"}]
 readme = "README.md"
 requires-python = ">=3.11"
@@ -9,9 +9,9 @@ requires-python = ">=3.11"
 dependencies = [
   "Flask>=3.0.3",
   "sqlalchemy>=2.0.31",
-  "pydantic>=2.7.4",
+  "pydantic>=2.10",
   "email-validator>=2.2.0",
-  "plaid-python>=23.0.0",
+  "plaid-python>=29.0.0",
 ]
 
 [project.optional-dependencies]

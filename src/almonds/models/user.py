@@ -1,5 +1,5 @@
 from sqlalchemy.schema import Column
-from sqlalchemy.types import BLOB, UUID, DateTime, String
+from sqlalchemy.types import UUID, DateTime, String
 
 from almonds.db.database import Base
 from almonds.models.constants import (
