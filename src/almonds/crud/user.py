@@ -14,7 +14,7 @@ def create_user(user: UserBase, *, sessionmaker: sessionmaker_ = SessionLocal) -
         id=uuid4(),
         created_at=datetime.utcnow(),
         last_updated=datetime.utcnow(),
-        **user.model_dump()
+        **user.model_dump(),
     )
     model = UserModel(
         id=created_user.id,
