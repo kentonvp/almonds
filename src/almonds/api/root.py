@@ -17,6 +17,7 @@ import almonds.crud.category as crud_category
 import almonds.crud.goal as crud_goal
 import almonds.crud.plaid_item as crud_plaid_item
 import almonds.crud.transaction as crud_transaction
+from almonds.services import charts
 from almonds.services.plaid import core
 from almonds.utils import ui
 
@@ -39,9 +40,9 @@ def view():
     context |= top_expenses()
     context |= recent_transactions()
     context |= budget_status()
-    context |= spending_chart()
     context |= saving_goals()
     context |= available_history()
+    context |= chart()
 
     return render_template("root.html", **context)
 
@@ -89,6 +90,18 @@ def set_active_month():
     return jsonify({"message": f"Active month set to {month} in session."}), 200
 
 
+@root.route("/setActiveChart", methods=["POST"])
+def set_active_chart():
+    data = request.get_json()
+    chart_type = data.get("chart")
+
+    if not chart_type:
+        return jsonify({"error": "Chart is required."}), 400
+
+    session["active_chart"] = chart_type
+    return jsonify({"message": f"Active chart set to {chart_type} in session."}), 200
+
+
 # Helper functions ////////////////////////////////////////////////////////////
 def build_context(**kwargs) -> dict:
     base = {
@@ -106,6 +119,13 @@ def get_active_date() -> datetime.date:
         return datetime.date.today()
 
     return datetime.datetime.fromisoformat(session["active_month"])
+
+
+def get_active_chart() -> str:
+    if "active_chart" not in session:
+        return "category"
+
+    return session["active_chart"]
 
 
 def user_context() -> dict:
@@ -261,13 +281,21 @@ def budget_status() -> dict:
     return {"budget_status": display_list, "num_overbudget": num_overbudget}
 
 
-def spending_chart() -> dict:
-    """Returns a dictionary with the following structure:
-    {
-        spending_chart (string html)
-    }
-    """
-    return {"spending_chart": "<pre>Contents</pre>"}
+def chart() -> dict:
+    chart_type = get_active_chart()
+
+    transactions = crud_transaction.get_transactions_by_month(
+        session["user_id"], get_active_date()
+    )
+
+    if chart_type == "category":
+        chart_html = charts.category_pie_chart(transactions)
+    elif chart_type == "dailySpending":
+        chart_html = charts.daily_spending_chart(transactions)
+    else:
+        chart_html = "Contents..."
+
+    return {"active_chart": chart_type, "chart_html": chart_html}
 
 
 def saving_goals() -> dict:
