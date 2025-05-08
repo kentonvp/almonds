@@ -42,7 +42,7 @@ def get_user_settings(
         settings = session.scalar(stmt)
 
     if not settings:
-        return default_settings()
+        return create_default_user_settings(user_id, sessionmaker=sessionmaker)
 
     settings = UserSetting.model_validate(settings)
     return parse(settings.dictionary)

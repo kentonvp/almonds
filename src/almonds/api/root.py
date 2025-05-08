@@ -17,6 +17,7 @@ import almonds.crud.category as crud_category
 import almonds.crud.goal as crud_goal
 import almonds.crud.plaid_item as crud_plaid_item
 import almonds.crud.transaction as crud_transaction
+import almonds.crud.user_settings as crud_user_settings
 from almonds.services import charts
 from almonds.services.plaid import core
 from almonds.utils import ui
@@ -142,6 +143,7 @@ def user_context() -> dict:
             },
             ...
         ]
+        settings: (dict)
     }
     """
     transactions = crud_transaction.get_transactions_by_month(
@@ -164,6 +166,7 @@ def user_context() -> dict:
             "income_this_month": income,
             "expenses_this_month": abs(expense),
             "savings_goal_progress": 0.0,
+            "settings": crud_user_settings.get_user_settings(session["user_id"]),
         }
     }
 
