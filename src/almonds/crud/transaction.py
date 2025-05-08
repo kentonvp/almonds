@@ -2,7 +2,7 @@ import datetime
 from uuid import UUID, uuid4
 
 from sqlalchemy.orm import sessionmaker as sessionmaker_
-from sqlalchemy.sql import extract, select, update
+from sqlalchemy.sql import extract, select, text, update
 
 from almonds.db.database import SessionLocal
 from almonds.models.transaction import Transaction as TransactionModel
@@ -104,6 +104,23 @@ def delete_transaction(
         session.commit()
 
 
+def get_available_months(
+    user_id: UUID, *, sessionmaker: sessionmaker_ = SessionLocal
+) -> list[tuple[int, int]]:
+    with sessionmaker() as session:
+        res = (
+            session.query(
+                extract("year", TransactionModel.datetime).label("year"),
+                extract("month", TransactionModel.datetime).label("month"),
+            )
+            .where(TransactionModel.user_id == user_id)
+            .group_by("year", "month")
+            .order_by(text("year DESC"), text("month DESC"))
+            .all()
+        )
+    return res
+
+
 def get_transactions_by_month(
     user_id: UUID,
     today: datetime.date | None = None,
@@ -115,10 +132,14 @@ def get_transactions_by_month(
         today = datetime.date.today()
 
     with sessionmaker() as session:
-        stmt = select(TransactionModel).where(
-            TransactionModel.user_id == user_id,
-            extract("month", TransactionModel.datetime) == today.month,
-            extract("year", TransactionModel.datetime) == today.year,
+        stmt = (
+            select(TransactionModel)
+            .where(
+                TransactionModel.user_id == user_id,
+                extract("month", TransactionModel.datetime) == today.month,
+                extract("year", TransactionModel.datetime) == today.year,
+            )
+            .order_by(TransactionModel.datetime)
         )
         transactions = session.scalars(stmt).all()
 

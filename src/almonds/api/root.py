@@ -1,7 +1,16 @@
+import datetime
 import heapq
 import math
 
-from flask import Blueprint, redirect, render_template, session, url_for
+from flask import (
+    Blueprint,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
 
 import almonds.crud.budget as crud_budget
 import almonds.crud.category as crud_category
@@ -32,6 +41,7 @@ def view():
     context |= budget_status()
     context |= spending_chart()
     context |= saving_goals()
+    context |= available_history()
 
     return render_template("root.html", **context)
 
@@ -65,6 +75,20 @@ def oauth_login():
     return render_template("oauth.html")
 
 
+@root.route("/setActiveMonth", methods=["POST"])
+def set_active_month():
+    data = request.get_json()
+    month = data.get("month")
+
+    if not month:
+        return jsonify({"error": "Month is required."}), 400
+
+    session["active_month"] = datetime.date(
+        int(month.split("-")[0]), int(month.split("-")[1]), 1
+    ).isoformat()
+    return jsonify({"message": f"Active month set to {month} in session."}), 200
+
+
 # Helper functions ////////////////////////////////////////////////////////////
 def build_context(**kwargs) -> dict:
     base = {
@@ -75,6 +99,13 @@ def build_context(**kwargs) -> dict:
         base["user"] = {"username": session["username"]}
 
     return base | kwargs
+
+
+def get_active_date() -> datetime.date:
+    if "active_month" not in session:
+        return datetime.date.today()
+
+    return datetime.datetime.fromisoformat(session["active_month"])
 
 
 def user_context() -> dict:
@@ -93,7 +124,9 @@ def user_context() -> dict:
         ]
     }
     """
-    transactions = crud_transaction.get_transactions_by_month(session["user_id"])
+    transactions = crud_transaction.get_transactions_by_month(
+        session["user_id"], get_active_date()
+    )
 
     income = 0.0
     expense = 0.0
@@ -126,7 +159,9 @@ def top_expenses() -> dict:
     ]
     """
 
-    transactions = crud_transaction.get_transactions_by_month(session["user_id"])
+    transactions = crud_transaction.get_transactions_by_month(
+        session["user_id"], get_active_date()
+    )
     categories = {}
     category_ids = {}
     for txn in transactions:
@@ -157,12 +192,12 @@ def recent_transactions() -> dict:
     return {
         "recent_transactions": [
             txn.model_dump()
-            for txn in crud_transaction.get_transactions_by_user(
-                session["user_id"], limit=5
+            for txn in crud_transaction.get_transactions_by_month(
+                session["user_id"], get_active_date()
             )
-        ],
+        ][-1:-6:-1],
         "total_transactions": crud_transaction.count_transactions_by_month(
-            session["user_id"]
+            session["user_id"], get_active_date()
         ),
     }
 
@@ -179,7 +214,9 @@ def budget_status() -> dict:
     ]
     """
     budgets = crud_budget.get_budgets_by_user_id(session["user_id"])
-    transactions = crud_transaction.get_transactions_by_month(session["user_id"])
+    transactions = crud_transaction.get_transactions_by_month(
+        session["user_id"], get_active_date()
+    )
     category_buckets = {}
     for txn in transactions:
         if txn.category_id not in category_buckets:
@@ -251,4 +288,31 @@ def saving_goals() -> dict:
             goal.model_dump()
             for goal in crud_goal.get_goals_by_user(session["user_id"])
         ]
+    }
+
+
+def available_history() -> dict:
+    """Returns a dictionary with the following structure:
+    {
+        available_history: [
+                {
+                    value: (string),
+                    label: (float)
+                }
+            ...
+        ],
+        active_month_value: (string) Y-m
+    }
+    """
+    available_months = [
+        {
+            "value": f"{int(year):04d}-{int(month):02d}",
+            "label": datetime.datetime(int(year), int(month), 1).strftime("%B %Y"),
+        }
+        for year, month in crud_transaction.get_available_months(session["user_id"])
+    ]
+
+    return {
+        "available_months": available_months,
+        "active_month_value": (get_active_date().strftime("%Y-%m")),
     }

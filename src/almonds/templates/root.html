@@ -6,9 +6,21 @@
 
 {% block content %}
 <div class="container mt-4">
-  <h1 class="mb-4">
-    Welcome back, <span class="fw-bold text-capitalize">{{ user.username }}</span>!
-  </h1>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-4">
+      Welcome back, <span class="fw-bold text-capitalize">{{ user.username }}</span>!
+    </h1>
+    <div>
+      <label for="monthSelect" class="form-label me-2">Select Month:</label>
+      <select id="monthSelect" class="form-select" style="width: auto; display: inline-block;">
+        {% for h in available_months %}
+        <option value="{{ h.value }}" {% if h.value == active_month_value %}selected{% endif %}>
+          {{ h.label }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
   <div class="row">
     <div class="col-md-6 col-lg-3 mb-4">
       <div class="card bg-warning text-white">
@@ -165,4 +177,24 @@
 {% endblock content %}
 
 {% block body_scripts %}
+<script>
+  async function setActiveMonth(month) {
+    console.log(month);
+    await fetch('{{ url_for("root.set_active_month") }}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ month })
+    });
+
+    location.reload();
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('monthSelect').addEventListener('change', function () {
+      setActiveMonth(this.value);
+    });
+  });
+</script>
 {% endblock body_scripts %}
