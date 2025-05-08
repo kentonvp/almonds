@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from almonds.templates.filters import format_currency, format_date
+from almonds.templates.filters import format_currency, format_date, format_dollars
 
 
 def test_format_date():
@@ -38,3 +38,26 @@ def test_format_currency():
     # Test large numbers
     assert format_currency(1234567.89) == "$1,234,567.89"
     assert format_currency(-1234567.89) == "-$1,234,567.89"
+
+
+def test_format_dollars():
+    # Test positive numbers
+    assert format_dollars(10.5) == "$10"
+    assert format_dollars(0.01) == "$0"
+    assert format_dollars(1000000.00) == "$1,000,000"
+    assert format_dollars(-1000000.00) == "-$1,000,000"
+
+    # Test negative numbers
+    assert format_dollars(-10.5) == "-$10"
+    assert format_dollars(-0.01) == "-$0"
+
+    # Test zero
+    assert format_dollars(0) == "$0"
+
+    # Test rounding
+    assert format_dollars(10.506) == "$11"
+    assert format_dollars(10.504) == "$11"
+
+    # Test large numbers
+    assert format_dollars(1234567.89) == "$1,234,568"
+    assert format_dollars(-1234567.89) == "-$1,234,568"

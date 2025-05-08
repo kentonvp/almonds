@@ -7,7 +7,7 @@ from almonds.api.plaid import plaid_bp
 from almonds.api.root import root
 from almonds.api.transactions import transaction_bp
 from almonds.db.base import Base, engine
-from almonds.templates.filters import format_currency, format_date
+from almonds.templates.filters import format_currency, format_date, format_dollars
 
 
 def create_app():
@@ -18,6 +18,7 @@ def create_app():
 
     app.jinja_env.filters["format_currency"] = format_currency
     app.jinja_env.filters["format_date"] = format_date
+    app.jinja_env.filters["format_dollars"] = format_dollars
 
     app.register_blueprint(root)
     app.register_blueprint(login_bp)

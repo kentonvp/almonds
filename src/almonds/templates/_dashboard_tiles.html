@@ -1,0 +1,117 @@
+<!--
+  This partial HTML generates the dashboard tiles at the top of the root page.
+  It includes the Net Balance, Income, Expenses, and Savings Goal.
+-->
+<div class="row">
+  <div class="col-md-6 col-lg-3 mb-4">
+    <div class="card bg-warning text-white h-100">
+      <div class="card-body d-flex flex-column justify-content-between">
+        <h3 class="card-title">Balance</h3>
+        <p class="card-text display-6 text-center">
+          {{ user.total_balance | format_currency }}
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6 col-lg-3 mb-4">
+    <div
+        class="card bg-info text-white h-100"
+        style="position: relative; overflow: hidden"
+        onmouseenter="this.querySelector('#edit-income-btn').style.opacity='1';"
+        onmouseleave="this.querySelector('#edit-income-btn').style.opacity='0';">
+      <div class="card-body" style="position: relative;">
+        <div class="d-flex flex-row justify-content-between">
+          <h3 class="card-title">Income</h3>
+          <div class="text-start" style="font-size: 0.9rem; opacity: 0.8;">
+          {% if user.settings.expected_income %}
+            Expected: {{ user.settings.expected_income | format_dollars }}
+          {% else %}
+            Set Expected Income
+          {% endif %}
+          </div>
+        </div>
+        <p class="card-text display-6 mb-1 text-center">
+          {{ user.income_this_month | format_currency }}
+        </p>
+        <button
+          type="button"
+          id="edit-income-btn"
+          class="btn btn-light btn-sm text-dark"
+          style="position: absolute; bottom: 0.5rem; right: 0.5rem; opacity: 0; transition: opacity 0.3s ease;"
+          onmouseover="this.style.opacity='1';"
+          onmouseout="this.style.opacity='0';"
+          data-bs-toggle="modal"
+          data-bs-target="#expected-income-modal"
+        > Edit </button>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6 col-lg-3 mb-4">
+    <div class="card bg-danger text-white h-100">
+      <div class="card-body">
+        <h3 class="card-title">Expenses</h3>
+        <p class="card-text display-6 text-center">
+          {{ user.expenses_this_month | format_currency }}
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6 col-lg-3 mb-4">
+    <div class="card bg-success text-white h-100">
+      <div class="card-body">
+        <h3 class="card-title">Savings</h3>
+        <p class="card-text display-6 text-center">{{ user.savings_goal_progress }}%</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit expected income modal -->
+<div
+  class="modal fade"
+  id="expected-income-modal"
+  tabindex="-1"
+  aria-labelledby="expected-income-modal-label"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="addTransactionModalLabel">
+          Expected Monthly Income
+        </h3>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form id="edit-expected-income-form" action="{{ url_for('root.set_expected_income') }}" method="POST">
+          <div class="mb-3">
+            <label for="expected-income-amount" class="form-label">Amount</label>
+            <input
+              type="number"
+              class="form-control"
+              id="expected-income-amount"
+              name="expected-income-amount"
+              step="0.01"
+              {% if user.settings.expected_income %}
+              value="{{ user.settings.expected_income }}"
+              {% endif %}
+              required
+            />
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="submit"
+          form="edit-expected-income-form"
+          class="btn btn-primary"
+          >Save</button>
+      </div>
+    </div>
+  </div>
+</div>

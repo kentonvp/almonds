@@ -7,3 +7,7 @@ def format_date(s: datetime) -> str:
 
 def format_currency(s: float) -> str:
     return f"${s:,.2f}".replace("$-", "-$")
+
+
+def format_dollars(s: float) -> str:
+    return f"${s:,.0f}".replace("$-", "-$")
