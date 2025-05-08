@@ -17,6 +17,7 @@ import almonds.crud.category as crud_category
 import almonds.crud.goal as crud_goal
 import almonds.crud.plaid_item as crud_plaid_item
 import almonds.crud.transaction as crud_transaction
+from almonds.services import charts
 from almonds.services.plaid import core
 from almonds.utils import ui
 
@@ -267,7 +268,11 @@ def spending_chart() -> dict:
         spending_chart (string html)
     }
     """
-    return {"spending_chart": "<pre>Contents</pre>"}
+    transactions = crud_transaction.get_transactions_by_month(
+        session["user_id"], get_active_date()
+    )
+
+    return {"spending_chart": charts.daily_spending_chart(transactions)}
 
 
 def saving_goals() -> dict:

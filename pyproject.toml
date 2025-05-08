@@ -12,6 +12,8 @@ dependencies = [
   "pydantic>=2.10",
   "email-validator>=2.2.0",
   "plaid-python>=29.0.0",
+  "pandas>=2.2",
+  "plotly>=6.0",
 ]
 
 [project.optional-dependencies]
