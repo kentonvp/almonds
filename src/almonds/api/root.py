@@ -20,7 +20,7 @@ import almonds.crud.transaction as crud_transaction
 import almonds.crud.user_settings as crud_user_settings
 from almonds.services import charts
 from almonds.services.plaid import core
-from almonds.utils import ui
+from almonds.utils import status_code, ui
 
 root = Blueprint("root", __name__)
 
@@ -97,10 +97,27 @@ def set_active_chart():
     chart_type = data.get("chart")
 
     if not chart_type:
-        return jsonify({"error": "Chart is required."}), 400
+        return (
+            jsonify({"error": "Chart is required."}),
+            status_code.HTTP_400_BAD_REQUEST,
+        )
 
     session["active_chart"] = chart_type
-    return jsonify({"message": f"Active chart set to {chart_type} in session."}), 200
+    return (
+        jsonify({"message": f"Active chart set to {chart_type} in session."}),
+        status_code.HTTP_200_OK,
+    )
+
+
+@root.route("/setExpectedIncome", methods=["POST"])
+def set_expected_income():
+    expected_income = float(request.form["expected-income-amount"])
+
+    crud_user_settings.update_user_settings(
+        session["user_id"],
+        {"expected_income": expected_income},
+    )
+    return redirect(url_for("root.view"))
 
 
 # Helper functions ////////////////////////////////////////////////////////////
