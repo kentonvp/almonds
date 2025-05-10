@@ -11,8 +11,8 @@ from almonds.api.root import root
 from almonds.api.transactions import transaction_bp
 from almonds.db.base import Base, engine
 from almonds.templates.filters import format_currency, format_date, format_dollars
+from almonds.utils import status_code
 from almonds.utils.logging import logger
-from src.almonds.utils import status_code
 
 
 def create_app():
