@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask
 
 from almonds.api.budget import budget_bp
@@ -14,7 +16,11 @@ def create_app():
     Base.metadata.create_all(engine)
 
     app = Flask(__name__)
-    app.secret_key = "YES.A.VERY.SECRET.KEY"
+
+    if os.getenv("ALMONDS_SECRET") is None:
+        raise ValueError("ALMONDS_SECRET environment variable not set")
+
+    app.secret_key = os.getenv("ALMONDS_SECRET")
 
     app.jinja_env.filters["format_currency"] = format_currency
     app.jinja_env.filters["format_date"] = format_date
