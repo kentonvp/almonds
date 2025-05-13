@@ -4,6 +4,11 @@ __pycache__/
 *$py.class
 
 almonds.db
+docs/
+policies/
+
+# Prometheus
+data/
 
 # C extensions
 *.so
