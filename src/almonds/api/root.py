@@ -18,6 +18,7 @@ import almonds.crud.goal as crud_goal
 import almonds.crud.plaid_item as crud_plaid_item
 import almonds.crud.transaction as crud_transaction
 import almonds.crud.user_settings as crud_user_settings
+from almonds.crypto.cryptograph import Cryptograph
 from almonds.services import charts
 from almonds.services.plaid import core
 from almonds.utils import status_code, ui
@@ -53,10 +54,13 @@ def settings():
     if "username" not in session:
         return redirect(url_for("root.view"))
 
+    # Decrypt.
+    crypto = Cryptograph()
+
     items = crud_plaid_item.get_items_for_user(session["user_id"])
     updated_items = []
     for it in items:
-        item_info = core.get_item(it.access_token.get_secret_value())
+        item_info = core.get_item(crypto.decrypt(it.access_token))
         updated_items.append(
             it.model_dump() | {"institution_name": item_info["institution_name"]}
         )

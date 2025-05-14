@@ -18,7 +18,7 @@ def create_item(
     model = PlaidItemModel(
         id=created_item.id,
         user_id=created_item.user_id,
-        access_token=created_item.access_token.get_secret_value(),
+        access_token=created_item.access_token,
         item_id=created_item.item_id,
         created_at=created_item.created_at,
         expired=created_item.expired,

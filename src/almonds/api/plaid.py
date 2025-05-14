@@ -3,6 +3,7 @@ from uuid import UUID
 from flask import Blueprint, request, session
 
 from almonds.crud import plaid_item as crud_plaid_item
+from almonds.crypto.cryptograph import Cryptograph
 from almonds.schemas.plaid_item import PlaidItemBase
 from almonds.services.plaid import core
 
@@ -26,10 +27,13 @@ def exchange_public_token():
     body = request.get_json()
     resp = core.exchange_public_token(body["public_token"])
 
+    # Encrypt the data.
+    crypto = Cryptograph()
+
     item = PlaidItemBase(
         user_id=session["user_id"],
-        access_token=resp["access_token"],
-        item_id=resp["item_id"],
+        access_token=crypto.encrypt(resp["access_token"]),
+        item_id=crypto.encrypt(resp["item_id"]),
     )
     print(f"Plaid Item: {item}")
     crud_plaid_item.create_item(item)
