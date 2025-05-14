@@ -22,12 +22,13 @@ def login():
         # Confirm login correct.
         if user := validate_login(username, password):
             store_user_session(user)
+            return redirect(url_for("root.view"))
         else:
             return render_template(
                 "login.html", error_msg="Incorrect username or password..."
             )
 
-    return redirect(url_for("root.view"))
+    return render_template("login.html")
 
 
 @login_bp.route("/logout", methods=["GET", "POST"])
@@ -75,3 +76,11 @@ def handle_new_user():
             store_user_session(user)
 
     return redirect(url_for("root.view"))
+
+
+@login_bp.route("/forgotPassword", methods=["GET", "POST"])
+def forgot_password():
+    return render_template(
+        "login.html",
+        error_msg="Shucks...Contact the developer to reset your password...",
+    )
