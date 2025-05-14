@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome{% endblock title %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="py-5 text-center bg-light">
+  <div class="container">
+    <img src="{{ url_for('static', filename='almond-icon.svg') }}" alt="Almonds Logo" height="100" class="mb-4">
+    <h1 class="display-4">Welcome to Almonds</h1>
+    <p class="lead">Simple budgetting.</p>
+    <a href="#signup" class="btn btn-primary btn-lg">Get Started</a>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5" id="features">
+  <div class="container">
+    <h2 class="text-center mb-4">Features</h2>
+    <div class="row">
+      <div class="col-md-4">
+        <div class="d-flex justify-content-center">
+            <img src="{{ url_for('static', filename='spending.png') }}" alt="Expense Icon created by Sukma Aditia - Flaticon" width="200" height="200" class="mb-4">
+        </div>
+        <h5 class="text-center">Track <b><i>YOUR</i></b> Spending</h5>
+      </div>
+      <div class="col-md-4">
+        <div class="d-flex justify-content-center">
+            <img src="{{ url_for('static', filename='budget.png') }}" alt="Expense Icon created by Freepik - Flaticon" width="200" height="200" class="mb-4">
+        </div>
+        <h5 class="text-center">Customize <b><i>YOUR</i></b> Budget</h5>
+      </div>
+      <div class="col-md-4">
+        <div class="d-flex justify-content-center">
+            <img src="{{ url_for('static', filename='travel.png') }}" alt="Expense Icon created by max.icons - Flaticon" width="200" height="200" class="mb-4">
+        </div>
+        <h5 class="text-center">Define <b><i>YOUR</i></b> Goals</h5>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Sign Up/Login Section -->
+<section class="py-5 bg-light" id="signup">
+  <div class="container text-center">
+    <h2 class="mb-4">Start Saving Today</h2>
+    <p class="mb-4">Sign up now to access all the features and benefits.</p>
+    <a href="{{ url_for('login.create_user') }}" class="btn btn-primary btn-lg me-2">Sign Up</a>
+    <a href="{{ url_for('login.login')}}" class="btn btn-outline-primary btn-lg">Login</a>
+  </div>
+</section>
+{% endblock content %}

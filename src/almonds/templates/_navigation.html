@@ -1,14 +1,12 @@
-<nav class="navbar navbar-expand-lg">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="{{ url_for('root.view') }}">
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center" href="{{ url_for('root.view') }}">
       <img
         src="{{ url_for('static', filename='almond-icon.svg') }}"
-        alt="Logo"
-        width="30"
-        height="24"
-        class="d-inline-block align-text-top"
+        alt="Almonds Logo"
+        height="30"
       />
-      Almonds
+      <span class="ms-2">Almonds</span>
     </a>
     {% if user is defined and user.username is defined %}
     <ul class="navbar-nav me-auto">
@@ -48,6 +46,20 @@
         </form>
       </li>
     </ul>
+    {% else %}
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="#pricing">Pricing</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#contact">Contact</a>
+        </li>
+      </ul>
+    </div>
     {% endif %}
   </div>
 </nav>

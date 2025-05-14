@@ -30,7 +30,7 @@ root = Blueprint("root", __name__)
 def view():
     if "username" not in session:
         context = build_context()
-        return render_template("login.html", **context)
+        return render_template("landing_page.html", **context)
 
     context = build_context(
         current_page="root",
