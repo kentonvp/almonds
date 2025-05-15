@@ -76,11 +76,6 @@ def plaid_login():
     return render_template("plaid.html", **build_context())
 
 
-@root.route("/oauth")
-def oauth_login():
-    return render_template("oauth.html", **build_context())
-
-
 @root.route("/setActiveMonth", methods=["POST"])
 def set_active_month():
     data = request.get_json()
