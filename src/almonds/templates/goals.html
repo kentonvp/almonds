@@ -104,6 +104,26 @@
       </tr>
       {% endfor %}
     </tbody>
+    <tfoot>
+      <tr class="fw-bold table-secondary">
+        <td class="text-center">Totals</td>
+        <td class="text-center">{{ total_current | format_currency }}</td>
+        <td class="text-center">{{ total_target | format_currency }}</td>
+        <td class="text-center">
+          <div class="progress">
+            <div class="progress-bar bg-info"
+                 role="progressbar"
+                 style="width: {{ total_progress }}%"
+                 aria-valuenow="{{ total_progress }}"
+                 aria-valuemin="0"
+                 aria-valuemax="100">{{ total_progress }}%</div>
+          </div>
+        </td>
+        <td class="text-center">—</td>
+        <td class="text-center">—</td>
+        <td class="text-center"></td>
+      </tr>
+    </tfoot>
   </table>
 
   <!-- Add Goal Modal -->

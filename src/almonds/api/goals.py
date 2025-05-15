@@ -25,7 +25,22 @@ def view():
         return redirect(url_for("root.view"))
 
     goals = crud_goal.get_goals_by_user(session["user_id"])
-    return render_template("goals.html", goals=goals, **build_context())
+
+    # Calculate totals
+    total_current = sum(g.current_amount for g in goals)
+    total_target = sum(g.target_amount for g in goals)
+    total_progress = (
+        int(round((total_current / total_target * 100))) if total_target else 0
+    )
+
+    return render_template(
+        "goals.html",
+        goals=goals,
+        total_current=total_current,
+        total_target=total_target,
+        total_progress=total_progress,
+        **build_context(),
+    )
 
 
 @goal_bp.route("/get", methods=["POST"])
