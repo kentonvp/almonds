@@ -154,4 +154,5 @@ def build_context():
     return base | {
         "title": "Budgets",
         "user": {"username": session["username"]},
+        "current_page": "budget",
     }

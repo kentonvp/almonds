@@ -94,4 +94,5 @@ def build_context():
     return base | {
         "title": "Goals",
         "user": {"username": session["username"]},
+        "current_page": "goals",
     }
