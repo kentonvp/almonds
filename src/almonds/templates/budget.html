@@ -194,6 +194,7 @@
     // Initialize a modal only once
     const editModal = new bootstrap.Modal(document.getElementById('editBudgetModal'));
 
+    // Edit budget buttons
     const editButtons = document.querySelectorAll('.edit-budget');
     editButtons.forEach(button => {
       button.addEventListener('click', function() {
@@ -226,75 +227,63 @@
 
     // Add proper cleanup when modal is hidden
     document.getElementById('editBudgetModal').addEventListener('hidden.bs.modal', function () {
-      e.preventDefault();
-
-      // Optional: Clear form data here if needed
-
-      const modal = boostrap.Modal.getInstance(document.getElementById('editBudgetModal'));
-      modal.hide();
+      document.getElementById('edit-budget-form').reset();
     });
-  });
 
-  // Delete budget
-  const deleteButtons = document.querySelectorAll('.delete-budget');
-  deleteButtons.forEach(button => {
-    button.addEventListener('click', function() {
-      const budgetId = this.getAttribute('data-id');
-      if (confirm('Are you sure you want to delete the budget for this category?')) {
-        fetch("{{ url_for('budget.delete_budget') }}", {
-          body: JSON.stringify({budget_id: budgetId}),
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': window.csrf_token
-          }
-        })
-        .then(response => {
-          if (response.ok) {
-            // Remove the row from the table
-            this.closest('tr').remove();
-          } else {
-            alert('Failed to delete the budget. Please try again.');
-          }
-        });
-      }
+    // Delete budget
+    const deleteButtons = document.querySelectorAll('.delete-budget');
+    deleteButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const budgetId = this.getAttribute('data-id');
+        if (confirm('Are you sure you want to delete the budget for this category?')) {
+          fetch("{{ url_for('budget.delete_budget') }}", {
+            body: JSON.stringify({budget_id: budgetId}),
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': window.csrf_token
+            }
+          })
+          .then(response => {
+            if (response.ok) {
+              // Remove the row from the table
+              this.closest('tr').remove();
+            } else {
+              alert('Failed to delete the budget. Please try again.');
+            }
+          });
+        }
+      });
     });
-  });
 
-  // When adding a new budget, show the last month's spending for the selected category
-  document.addEventListener('DOMContentLoaded', function() {
+    // When adding a new budget, show the last month's spending for the selected category
     const categorySelect = document.getElementById('budget-category');
     const budgetAmount = document.getElementById('budget-amount');
     const lastMonthSpending = document.getElementById('last-month-spending');
 
-    categorySelect.addEventListener('change', function() {
-      const categoryId = this.value;
-      if (categoryId) {
-        const lastMonthAmount = getLastMonthSpending(categoryId);
-        lastMonthSpending.textContent = `Last month's spending: ${lastMonthAmount}`;
-      } else {
-        lastMonthSpending.textContent = '';
-      }
-    });
-
-    function getLastMonthSpending(categoryId) {
-      fetch("{{ url_for('budget.get_last_month_spending') }}", {
-        body: JSON.stringify({ category_id: categoryId }),
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': window.csrf_token
+    if (categorySelect) {
+      categorySelect.addEventListener('change', function() {
+        const categoryId = this.value;
+        if (categoryId) {
+          fetch("{{ url_for('budget.get_last_month_spending') }}", {
+            body: JSON.stringify({ category_id: categoryId }),
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': window.csrf_token
+            }
+          })
+            .then(response => response.json())
+            .then(data => {
+              lastMonthSpending.textContent = `Last month's spending: ${data.amount}`;
+            });
+        } else {
+          lastMonthSpending.textContent = '';
         }
-      })
-        .then(response => response.json())
-        .then(data => {
-          return data.amount;
-        });
+      });
     }
-  });
 
-  // Sorting functionality
-  document.addEventListener('DOMContentLoaded', function() {
+    // Sorting functionality
     const tableBody = document.getElementById('budget-table-body');
     const sortButtons = document.querySelectorAll('[data-sort]');
     let currentSort = { column: 'percentage', direction: 'desc', first: true };
