@@ -4,7 +4,7 @@
 
 {% block content %}
 <!-- Hero Section -->
-<section class="py-5 text-center bg-light">
+<section class="py-5 text-center bg-{{ theme }}">
   <div class="container">
     <img src="{{ url_for('static', filename='almond-icon.svg') }}" alt="Almonds Logo" height="100" class="mb-4">
     <h1 class="display-4">Welcome to Almonds</h1>
@@ -41,7 +41,7 @@
 </section>
 
 <!-- Sign Up/Login Section -->
-<section class="py-5 bg-light" id="signup">
+<section class="py-5 bg-{{ theme }}" id="signup">
   <div class="container text-center">
     <h2 class="mb-4">Start Saving Today</h2>
     <p class="mb-4">Sign up now to access all the features and benefits.</p>

@@ -11,6 +11,7 @@ from flask import (
     url_for,
 )
 
+from almonds.api import root
 from almonds.crud import category as crud_category
 from almonds.crud import transaction as crud_transaction
 from almonds.schemas.transaction import Transaction, TransactionBase
@@ -169,7 +170,8 @@ def reset_filter():
 
 
 def build_context(**kwargs) -> dict:
-    context = {
+    base = root.build_context()
+    context = base | {
         "title": "Transactions",
         "user": {"username": session["username"]},
         "current_page": "transactions",
