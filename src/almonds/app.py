@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, request
+from flask import Flask, render_template, request
 from prometheus_flask_exporter import PrometheusMetrics
 
 from almonds.api.budget import budget_bp
@@ -57,5 +57,9 @@ def create_app():
             accept_header="application/json"
         )
         return response_data, status_code.HTTP_200_OK, {"Content-Type": content_type}
+
+    @app.errorhandler(status_code.HTTP_404_NOT_FOUND)
+    def not_found(e):
+        return render_template("404.html")
 
     return app
