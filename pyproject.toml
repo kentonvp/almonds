@@ -29,3 +29,6 @@ dev = [
 
 [tool.isort]
 profile = "black"
+
+[tool.setuptools.package-data]
+almonds = ["logging.conf"]
