@@ -44,6 +44,7 @@
       </li>
       <li class="nav-item">
         <form action="{{ url_for('login.logout') }}" method="POST">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
           <button type="submit" class="nav-link">Logout</button>
         </form>
       </li>
@@ -92,7 +93,8 @@ async function toggleTheme() {
   await fetch('{{ url_for("root.set_theme") }}', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'X-CSRFToken': window.csrf_token
     },
     body: JSON.stringify({ theme })
   });

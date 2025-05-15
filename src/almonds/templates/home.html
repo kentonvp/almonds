@@ -158,7 +158,8 @@
     await fetch('{{ url_for("root.set_active_month") }}', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'X-CSRFToken': window.csrf_token
       },
       body: JSON.stringify({ month })
     });
@@ -175,7 +176,8 @@
     await fetch('{{ url_for("root.set_active_chart") }}', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'X-CSRFToken': window.csrf_token
       },
       body: JSON.stringify({ chart })
     });

@@ -23,6 +23,7 @@
           body: JSON.stringify({ public_token: publicToken }),
           headers: {
             "Content-Type": "application/json",
+            "X-CSRFToken": window.csrf_token
           },
         });
         window.location.href = "{{ url_for('root.view') }}";
@@ -57,7 +58,8 @@
         const response = await fetch("{{ url_for('plaid.delete_access_token') }}", {
           method: 'DELETE',
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
+            "X-CSRFToken": window.csrf_token
           },
           body: JSON.stringify({
             id: itemId

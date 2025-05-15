@@ -89,6 +89,7 @@
       </div>
       <div class="modal-body">
         <form id="edit-expected-income-form" action="{{ url_for('root.set_expected_income') }}" method="POST">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
           <div class="mb-3">
             <label for="expected-income-amount" class="form-label">Amount</label>
             <input

@@ -8,6 +8,7 @@ requires-python = ">=3.11"
 
 dependencies = [
   "Flask>=3.0.3",
+  "Flask-WTF>=1.2.1",
   "sqlalchemy>=2.0.31",
   "pydantic>=2.10",
   "email-validator>=2.2.0",

@@ -63,10 +63,10 @@
         <td class="text-center">
           <div class="progress">
             <div class="progress-bar bg-{{ budget.status_color }}"
-                 role="progressbar" 
-                 style="width: {{ budget.percentage }}%" 
-                 aria-valuenow="{{ budget.percentage }}" 
-                 aria-valuemin="0" 
+                 role="progressbar"
+                 style="width: {{ budget.percentage }}%"
+                 aria-valuenow="{{ budget.percentage }}"
+                 aria-valuemin="0"
                  aria-valuemax="100">{{ budget.percentage }}%</div>
           </div>
         </td>
@@ -113,6 +113,7 @@
         </div>
         <div class="modal-body">
           <form id="edit-budget-form" action="{{ url_for('budget.update_budget') }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <div class="mb-3">
               <label for="edit-budget-category" class="form-label">Category</label>
               <input
@@ -161,6 +162,7 @@
         </div>
         <div class="modal-body">
           <form id="add-budget-form" action="{{ url_for('budget.create_budget') }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <div class="mb-3">
               <label for="budget-category" class="form-label">Category</label>
               <select class="form-select" id="budget-category" name="budget-category" required>
@@ -198,11 +200,14 @@
         const budgetId = this.getAttribute('data-id');
         // Fetch budget data from the server using the ID
         fetch(
-          "{{ url_for('budget.get_budget') }}", 
+          "{{ url_for('budget.get_budget') }}",
           {
             body: JSON.stringify({budget_id: budgetId}),
             method: 'POST',
-            headers: {'Content-Type': 'application/json'}
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': window.csrf_token
+            }
           }
         )
           .then(response => response.json())
@@ -239,7 +244,10 @@
         fetch("{{ url_for('budget.delete_budget') }}", {
           body: JSON.stringify({budget_id: budgetId}),
           method: 'POST',
-          headers: {'Content-Type': 'application/json'}
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': window.csrf_token
+          }
         })
         .then(response => {
           if (response.ok) {
@@ -275,6 +283,7 @@
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
+          'X-CSRFToken': window.csrf_token
         }
       })
         .then(response => response.json())
@@ -301,7 +310,7 @@
       }
 
       updateSortIndicators();
-      
+
       const rows = Array.from(tableBody.querySelectorAll('tr'));
       rows.sort((a, b) => {
         let aValue = a.children[getColumnIndex(column)].textContent.trim();
