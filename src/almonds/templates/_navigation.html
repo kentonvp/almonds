@@ -1,4 +1,8 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+{% if theme == 'dark' %}
+<nav class="navbar navbar-expand-lg navbar-dark shadow-sm", data-bs-theme="dark">
+{% else%}
+<nav class="navbar navbar-expand-lg navbar-light shadow-sm", data-bs-theme="light">
+{% endif %}
   <div class="container">
     <a class="navbar-brand d-flex align-items-center" href="{{ url_for('root.view') }}">
       <img
@@ -9,7 +13,7 @@
       <span class="ms-2">Almonds</span>
     </a>
     {% if user is defined and user.username is defined %}
-    <ul class="navbar-nav me-auto">
+    <ul class="navbar-nav ms-auto">
       <li class="nav-item">
         <a
           class="nav-link {{'active' if current_page == 'transactions' else ''}}"
@@ -38,12 +42,19 @@
           >Settings</a
         >
       </li>
-    </ul>
-    <ul class="navbar-nav">
       <li class="nav-item">
         <form action="{{ url_for('login.logout') }}" method="POST">
           <button type="submit" class="nav-link">Logout</button>
         </form>
+      </li>
+      <li class="nav-item d-flex align-items-center">
+        <button type="button" class="btn nav-link p-0 mx-2" id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle theme" style="background: none; border: none;">
+          {% if theme == 'dark' %}
+            <i id="theme-icon" class="bi bi-moon-fill"></i>
+          {% else %}
+            <i id="theme-icon" class="bi bi-sun-fill"></i>
+          {% endif %}
+        </button>
       </li>
     </ul>
     {% else %}
@@ -58,8 +69,34 @@
         <li class="nav-item">
           <a class="nav-link" href="#contact">Contact</a>
         </li>
+        <li class="nav-item d-flex align-items-center">
+          <button type="button" class="btn nav-link p-0 mx-2" id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle theme" style="background: none; border: none;">
+            {% if theme == 'dark' %}
+              <i class="bi bi-moon-fill"></i>
+            {% else %}
+              <i class="bi bi-sun-fill"></i>
+            {% endif %}
+          </button>
+        </li>
       </ul>
     </div>
     {% endif %}
   </div>
 </nav>
+
+<script>
+async function toggleTheme() {
+  const currentTheme = document.body.getAttribute('data-bs-theme');
+  const theme = currentTheme === "dark" ? "light" : "dark";
+
+  await fetch('{{ url_for("root.set_theme") }}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ theme })
+  });
+
+  location.reload();
+}
+</script>

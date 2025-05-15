@@ -73,12 +73,12 @@ def settings():
 
 @root.route("/plaidLogin")
 def plaid_login():
-    return render_template("plaid.html")
+    return render_template("plaid.html", **build_context())
 
 
 @root.route("/oauth")
 def oauth_login():
-    return render_template("oauth.html")
+    return render_template("oauth.html", **build_context())
 
 
 @root.route("/setActiveMonth", methods=["POST"])
@@ -124,11 +124,21 @@ def set_expected_income():
     return redirect(url_for("root.view"))
 
 
+@root.route("/setTheme", methods=["POST"])
+def set_theme():
+    data = request.get_json()
+    theme = data.get("theme")
+
+    session["theme"] = theme
+    return (
+        jsonify({"message": f"Theme set to {theme} in session."}),
+        status_code.HTTP_200_OK,
+    )
+
+
 # Helper functions ////////////////////////////////////////////////////////////
 def build_context(**kwargs) -> dict:
-    base = {
-        "title": "Dashboard",
-    }
+    base = {"title": "Dashboard", "theme": get_theme()}
 
     if "user_id" in session:
         base["user"] = {"username": session["username"]}
@@ -144,10 +154,11 @@ def get_active_date() -> datetime.date:
 
 
 def get_active_chart() -> str:
-    if "active_chart" not in session:
-        return "category"
+    return session.get("active_chart", "category")
 
-    return session["active_chart"]
+
+def get_theme() -> str:
+    return session.get("theme", "light")
 
 
 def user_context() -> dict:
