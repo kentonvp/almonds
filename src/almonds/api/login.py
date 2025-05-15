@@ -1,7 +1,7 @@
 from flask import Blueprint, redirect, render_template, request, session, url_for
 from pydantic.types import SecretStr
 
-from almonds.api import root
+from almonds.api import home
 from almonds.crud import user as crud_user
 from almonds.schemas.user import UserBase
 from almonds.services.login import hash_password, is_valid_password, validate_login
@@ -15,7 +15,7 @@ def store_user_session(user):
 
 
 def build_context():
-    base = root.build_context()
+    base = home.build_context()
     return base
 
 

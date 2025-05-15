@@ -45,12 +45,12 @@
   document.addEventListener('DOMContentLoaded', function() {
   // Get all unlink buttons
   const unlinkButtons = document.querySelectorAll('.unlink-account-btn');
-  
+
   // Add click handler to each button
   unlinkButtons.forEach(button => {
     button.addEventListener('click', async function() {
       const itemId = this.getAttribute('data-item-id');
-      
+
       try {
         const response = await fetch("{{ url_for('plaid.delete_access_token') }}", {
           method: 'DELETE',
@@ -95,4 +95,3 @@
 </p>
 {% endfor %}
 {% endblock content %}
-

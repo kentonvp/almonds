@@ -3,11 +3,12 @@ import os
 from flask import Flask, render_template, request
 from prometheus_flask_exporter import PrometheusMetrics
 
+from almonds.api import home
 from almonds.api.budget import budget_bp
 from almonds.api.goals import goal_bp
+from almonds.api.home import root
 from almonds.api.login import login_bp
 from almonds.api.plaid import plaid_bp
-from almonds.api.root import root
 from almonds.api.transactions import transaction_bp
 from almonds.db.base import Base, engine
 from almonds.templates.filters import format_currency, format_date, format_dollars
@@ -60,6 +61,6 @@ def create_app():
 
     @app.errorhandler(status_code.HTTP_404_NOT_FOUND)
     def not_found(e):
-        return render_template("404.html")
+        return render_template("404.html", **home.build_context())
 
     return app

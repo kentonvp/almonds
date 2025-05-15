@@ -46,7 +46,7 @@ def view():
     context |= available_history()
     context |= chart()
 
-    return render_template("root.html", **context)
+    return render_template("home.html", **context)
 
 
 @root.route("/settings")

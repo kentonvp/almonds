@@ -11,7 +11,7 @@ from flask import (
     url_for,
 )
 
-from almonds.api import root
+from almonds.api import home
 from almonds.crud import goal as crud_goal
 from almonds.schemas.goal import GoalBase, GoalUpdate
 from almonds.utils import status_code
@@ -89,7 +89,7 @@ def delete_goal():
 
 
 def build_context():
-    base = root.build_context()
+    base = home.build_context()
 
     return base | {
         "title": "Goals",
