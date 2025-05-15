@@ -1,7 +1,94 @@
 {% extends 'base.html' %}
+
+{% block head_scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
+<script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+<script>
+  (async ($) => {
+    // Grab a Link token to initialize Link
+    const createLinkToken = async () => {
+      const res = await fetch("{{ url_for('plaid.create_link_token') }}");
+      const data = await res.json();
+      const linkToken = data.link_token;
+      localStorage.setItem("link_token", linkToken);
+      return linkToken;
+    };
+
+    // Initialize Link.
+    const handler = Plaid.create({
+      token: await createLinkToken(),
+      onSuccess: async (publicToken, metadata) => {
+        await fetch("{{ url_for('plaid.exchange_public_token') }}", {
+          method: "POST",
+          body: JSON.stringify({ public_token: publicToken }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        window.location.href = "{{ url_for('root.view') }}";
+      },
+      onEvent: (eventName, metadata) => {
+        console.log("Event:", eventName);
+        console.log("Metadata:", metadata);
+      },
+      onExit: (error, metadata) => {
+        console.log(error, metadata);
+      },
+    });
+
+    // Start Link when button is clicked
+    const linkAccountButton = document.getElementById("link-account-btn");
+    linkAccountButton.addEventListener("click", (event) => {
+      handler.open();
+    });
+  })(jQuery);
+
+  // Unlink items from account
+  document.addEventListener('DOMContentLoaded', function() {
+  // Get all unlink buttons
+  const unlinkButtons = document.querySelectorAll('.unlink-account-btn');
+
+  // Add click handler to each button
+  unlinkButtons.forEach(button => {
+    button.addEventListener('click', async function() {
+      const itemId = this.getAttribute('data-item-id');
+
+      try {
+        const response = await fetch("{{ url_for('plaid.delete_access_token') }}", {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            id: itemId
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to unlink account');
+        }
+
+        // Refresh the page or update UI as needed
+        window.location.reload();
+      } catch (error) {
+        console.error('Error unlinking account:', error);
+        alert('Failed to unlink account. Please try again.');
+      }
+    });
+  });
+});
+</script>
+{% endblock head_scripts %}
+
 {% block title %}Settings{% endblock title %}
-{% block header %} {% endblock header %}
+
 {% block content %}
-<h1>Settings</h1>
-{% include('plaid.html') %}
+<div class="container mt-4">
+  <div class="row align-text-center mb-4">
+    <div class="col">
+      <h1>Settings</h1>
+    </div>
+  </div>
+  {% include('plaid.html') %}
+</div>
 {% endblock content %}

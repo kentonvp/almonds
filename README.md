@@ -2,6 +2,7 @@
 
 Personal Finance App
 
+---
 
 ## Project Setup
 
@@ -37,6 +38,7 @@ $ make app
 
 7. Open in a browser: `http://127.0.0.1:5000`
 
+---
 
 # Using Grafana + Prometheus
 
@@ -51,6 +53,7 @@ $ brew services stop grafana
 $ prometheus --config.file=prometheus.yml
 ```
 
+---
 
 ![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/kentonvp/1898a7f66ccef8dab95271b327e55aa7/raw/covbadge.json)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)

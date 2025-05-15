@@ -12,7 +12,7 @@ from flask import (
     url_for,
 )
 
-from almonds.api import root
+from almonds.api import home
 from almonds.crud import budget as crud_budget
 from almonds.crud import category as crud_category
 from almonds.crud import transaction as crud_transaction
@@ -149,9 +149,10 @@ def get_last_month_spending():
 
 
 def build_context():
-    base = root.build_context()
+    base = home.build_context()
 
     return base | {
         "title": "Budgets",
         "user": {"username": session["username"]},
+        "current_page": "budget",
     }

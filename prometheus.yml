@@ -1,9 +1,9 @@
 global:
-  scrape_interval: 15s  # How often to scrape targets by default.
-  evaluation_interval: 15s  # How often to evaluate rules.
+  scrape_interval: 15s
+  evaluation_interval: 15s
 
 scrape_configs:
 - job_name: 'almonds'
   static_configs:
     - targets:
-      - 127.0.0.1:5000  # Replace with your Flask app's host and port.
+      - 127.0.0.1:5000
