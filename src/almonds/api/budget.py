@@ -131,7 +131,7 @@ def get_last_month_spending():
             jsonify({"error": "Category ID not provided"}),
             status_code.HTTP_400_BAD_REQUEST,
         )
-    category_id = body["category_id"]
+    category_id = int(body["category_id"])
 
     dt = datetime.datetime.utcnow()
     last_month_dt = dt - datetime.timedelta(days=dt.day)

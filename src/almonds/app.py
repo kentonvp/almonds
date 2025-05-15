@@ -1,6 +1,7 @@
 import os
 
 from flask import Flask, render_template, request
+from flask_wtf.csrf import CSRFError, CSRFProtect
 from prometheus_flask_exporter import PrometheusMetrics
 
 from almonds.api import home
@@ -23,6 +24,10 @@ def create_app():
 
     metrics = PrometheusMetrics(app)
     logger.info("Prometheus metrics initializaed")
+
+    # Initialize CSRF protection
+    CSRFProtect(app)
+    logger.info("CSRF protection initialized")
 
     if os.getenv("ALMONDS_SECRET") is None:
         raise ValueError("ALMONDS_SECRET environment variable not set")
@@ -62,5 +67,13 @@ def create_app():
     @app.errorhandler(status_code.HTTP_404_NOT_FOUND)
     def not_found(e):
         return render_template("404.html", **home.build_context())
+
+    @app.errorhandler(CSRFError)
+    def handle_csrf_error(e):
+        logger.error(f"CSRF error: {e}", exc_info=True)
+        return (
+            render_template("csrf_error.html", reason=e.description),
+            status_code.HTTP_400_BAD_REQUEST,
+        )
 
     return app

@@ -1,4 +1,4 @@
-{% extends 'base.html' %} 
+{% extends 'base.html' %}
 
 {% block head_scripts %}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -31,6 +31,7 @@
   <div class="card mb-4">
     <div class="card-body">
       <form id="transaction-filter" class="row g-3" action="{{ url_for('transactions.filter_form') }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <div class="col-md-3">
           <label for="date-range" class="form-label">Date Range</label>
           <select id="date-range" name="date-range" class="form-select">
@@ -180,6 +181,7 @@
         </div>
         <div class="modal-body">
           <form id="add-transaction-form" action="{{ url_for('transactions.create_transaction') }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <div class="mb-3">
               <label for="transaction-date" class="form-label">Date</label>
               <input
@@ -283,6 +285,7 @@
         </div>
         <div class="modal-body">
           <form id="edit-transaction-form" action="{{ url_for('transactions.update_transaction') }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <div class="mb-3">
               <label for="edit-transaction-date" class="form-label">Date</label>
               <input type="date" class="form-control" id="edit-transaction-date" name="transaction-date" required>
@@ -337,11 +340,14 @@
         const transactionId = this.getAttribute('data-id');
         // Fetch transaction data from the server using the ID
         fetch(
-          "{{ url_for('transactions.get_transaction') }}", 
+          "{{ url_for('transactions.get_transaction') }}",
           {
             body: JSON.stringify({transaction_id: transactionId}),
             method: 'POST',
-            headers: {'Content-Type': 'application/json'}
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': window.csrf_token
+            },
           }
         )
           .then(response => response.json())
@@ -384,7 +390,10 @@
         fetch("{{ url_for('transactions.delete_transaction') }}", {
           body: JSON.stringify({transaction_id: transactionId}),
           method: 'POST',
-          headers: {'Content-Type': 'application/json'}
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': window.csrf_token
+          },
         })
         .then(response => {
           if (response.ok) {

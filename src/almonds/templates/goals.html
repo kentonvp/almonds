@@ -76,10 +76,10 @@
           {% set progress = (goal.current_amount / goal.target_amount * 100) | round | int %}
           <div class="progress">
             <div class="progress-bar bg-success"
-                 role="progressbar" 
-                 style="width: {{ progress }}%" 
-                 aria-valuenow="{{ progress }}" 
-                 aria-valuemin="0" 
+                 role="progressbar"
+                 style="width: {{ progress }}%"
+                 aria-valuenow="{{ progress }}"
+                 aria-valuemin="0"
                  aria-valuemax="100">{{ progress }}%</div>
           </div>
         </td>
@@ -127,6 +127,7 @@
         </div>
         <div class="modal-body">
           <form id="add-goal-form" action="{{ url_for('goal.create_goal') }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <div class="mb-3">
               <label for="add-goal-name" class="form-label">Goal Name</label>
               <input type="text" class="form-control" id="add-goal-name" name="goal-name" autocomplete="off" required>
@@ -181,6 +182,7 @@
         </div>
         <div class="modal-body">
           <form id="edit-goal-form" action="{{ url_for('goal.update_goal') }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <div class="mb-3">
               <label for="edit-goal-name" class="form-label">Goal Name</label>
               <input type="text" class="form-control" id="edit-goal-name" name="goal-name" required>
@@ -229,11 +231,14 @@
         const goalId = this.getAttribute('data-id');
         // Fetch goal data from the server using the ID
         fetch(
-          "{{ url_for('goal.get_goal') }}", 
+          "{{ url_for('goal.get_goal') }}",
           {
             body: JSON.stringify({goal_id: goalId}),
             method: 'POST',
-            headers: {'Content-Type': 'application/json'}
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': window.csrf_token
+            }
           }
         )
           .then(response => response.json())
@@ -245,7 +250,7 @@
             document.getElementById('edit-goal-target-amount').value = data.target_amount;
             document.getElementById('edit-goal-deadline').value = data.deadline_datestr;
             document.getElementById('edit-goal-status').value = data.status;
-            
+
             // Show the edit modal
             editModal.show();
           });
@@ -272,7 +277,10 @@
         fetch("{{ url_for('goal.delete_goal') }}", {
           body: JSON.stringify({goal_id: goalId}),
           method: 'POST',
-          headers: {'Content-Type': 'application/json'}
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': window.csrf_token
+          }
         })
         .then(response => {
           if (response.ok) {
@@ -303,7 +311,7 @@
       }
 
       updateSortIndicators();
-      
+
       const rows = Array.from(tableBody.querySelectorAll('tr'));
       rows.sort((a, b) => {
         let aValue = a.children[getColumnIndex(column)].textContent.trim();
