@@ -45,6 +45,7 @@ def view():
     context |= saving_goals()
     context |= available_history()
     context |= chart()
+    context |= user_notifications()
 
     return render_template("home.html", **context)
 
@@ -379,3 +380,18 @@ def available_history() -> dict:
         "available_months": available_months,
         "active_month_value": (get_active_date().strftime("%Y-%m")),
     }
+
+
+def user_notifications() -> dict:
+    """Returns a dictionary with the following structure:
+    {
+        notifications: [
+            {
+                type (string)
+                message (string)
+            },
+            ...
+        ]
+    }
+    """
+    return {"notifications": []}
