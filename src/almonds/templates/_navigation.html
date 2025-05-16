@@ -1,8 +1,4 @@
-{% if theme == 'dark' %}
-<nav class="navbar navbar-expand-lg navbar-dark shadow-sm", data-bs-theme="dark">
-{% else%}
-<nav class="navbar navbar-expand-lg navbar-light shadow-sm", data-bs-theme="light">
-{% endif %}
+<nav class="navbar navbar-collapse navbar-expand-lg navbar-{{ theme }} shadow-sm", data-bs-theme="{{ theme }}">
   <div class="container">
     <a class="navbar-brand d-flex align-items-center" href="{{ url_for('root.view') }}">
       <img
@@ -12,57 +8,57 @@
       />
       <span class="ms-2">Almonds</span>
     </a>
-    {% if user is defined and user.username is defined %}
-    <ul class="navbar-nav ms-auto">
-      <li class="nav-item">
-        <a
-          class="nav-link {{'active' if current_page == 'transactions' else ''}}"
-          href="{{ url_for('transactions.view') }}"
-          >Transactions</a
-        >
-      </li>
-      <li class="nav-item">
-        <a
-          class="nav-link {{'active' if current_page == 'budget' else ''}}"
-          href="{{ url_for('budget.view') }}"
-          >Budget</a
-        >
-      </li>
-      <li class="nav-item">
-        <a
-          class="nav-link {{'active' if current_page == 'goals' else ''}}"
-          href="{{ url_for('goal.view') }}"
-          >Goals</a
-        >
-      </li>
-      <li class="nav-item">
-        <a
-          class="nav-link {{'active' if current_page == 'settings' else ''}}"
-          href="{{ url_for('root.settings') }}"
-          >Settings</a
-        >
-      </li>
-      <li class="nav-item">
-        <form action="{{ url_for('login.logout') }}" method="POST">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-          <button type="submit" class="nav-link">Logout</button>
-        </form>
-      </li>
-      <li class="nav-item d-flex align-items-center">
-        <button type="button" class="btn nav-link p-0 mx-2" id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle theme" style="background: none; border: none;">
-          {% if theme == 'dark' %}
-            <i id="theme-icon" class="bi bi-moon-fill"></i>
-          {% else %}
-            <i id="theme-icon" class="bi bi-sun-fill"></i>
-          {% endif %}
-        </button>
-      </li>
-    </ul>
-    {% else %}
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
+    <div class="collapse navbar-collapse" id="navbar-collapse-nav">
+      {% if user is defined and user.username is defined %}
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a
+            class="nav-link {{'active' if current_page == 'transactions' else ''}}"
+            href="{{ url_for('transactions.view') }}"
+            >Transactions</a
+          >
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link {{'active' if current_page == 'budget' else ''}}"
+            href="{{ url_for('budget.view') }}"
+            >Budget</a
+          >
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link {{'active' if current_page == 'goals' else ''}}"
+            href="{{ url_for('goal.view') }}"
+            >Goals</a
+          >
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link {{'active' if current_page == 'settings' else ''}}"
+            href="{{ url_for('root.settings') }}"
+            >Settings</a
+          >
+        </li>
+        <li class="nav-item">
+          <form action="{{ url_for('login.logout') }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <button type="submit" class="nav-link">Logout</button>
+          </form>
+        </li>
+        <li class="nav-item d-flex align-items-center">
+          <button type="button" class="btn nav-link p-0 mx-2" id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle theme" style="background: none; border: none;">
+            {% if theme == 'dark' %}
+              <i id="theme-icon" class="bi bi-moon-fill"></i>
+            {% else %}
+              <i id="theme-icon" class="bi bi-sun-fill"></i>
+            {% endif %}
+          </button>
+        </li>
+      </ul>
+      {% else %}
       <ul class="navbar-nav ms-auto">
         <li class="nav-item">
           <a class="nav-link" href="#pricing">Pricing</a>
@@ -80,8 +76,8 @@
           </button>
         </li>
       </ul>
+      {% endif %}
     </div>
-    {% endif %}
   </div>
 </nav>
 
@@ -101,4 +97,15 @@ async function toggleTheme() {
 
   location.reload();
 }
+
+// Fallback toggler if Bootstrap JS is not loaded
+document.addEventListener('DOMContentLoaded', function() {
+  var toggler = document.querySelector('.navbar-toggler');
+  var navCollapse = document.getElementById('navbar-collapse-nav');
+  if (toggler && navCollapse) {
+    toggler.addEventListener('click', function() {
+      navCollapse.classList.toggle('show');
+    });
+  }
+});
 </script>
