@@ -13,7 +13,7 @@ from almonds.services.plaid.core import (
     create_link_token,
     exchange_public_token,
     get_balance,
-    get_item,
+    get_item_info,
     sync_transactions,
 )
 
@@ -138,12 +138,12 @@ def test_sync_transactions(mock_plaid_client, monkeypatch):
     assert len(result["removed"]) == 1
 
 
-def test_get_item(mock_plaid_client):
+def test_get_item_info(mock_plaid_client):
     # Arrange
     access_token = "access-sandbox-12345"
 
     # Act
-    result = get_item(access_token)
+    result = get_item_info(access_token)
 
     # Assert
     assert result["item_id"] == "item-sandbox-12345"

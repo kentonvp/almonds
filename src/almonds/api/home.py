@@ -61,9 +61,13 @@ def settings():
     items = crud_plaid_item.get_items_for_user(session["user_id"])
     updated_items = []
     for it in items:
-        item_info = core.get_item(crypto.decrypt(it.access_token))
+        item_info = core.get_item_info(crypto.decrypt(it.access_token))
         updated_items.append(
-            it.model_dump() | {"institution_name": item_info["institution_name"]}
+            it.model_dump()
+            | {
+                "institution_name": item_info["institution_name"],
+                "products": item_info["products"],
+            }
         )
 
     context = build_context()

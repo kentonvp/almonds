@@ -71,7 +71,7 @@ def sync_transactions(access_token: str, *, cursor: str | None = None) -> dict:
     return transactions
 
 
-def get_item(access_token: str) -> dict:
+def get_item_info(access_token: str) -> dict:
     req = ItemGetRequest(access_token=access_token)
     resp = client.item_get(req)
     return resp["item"]
