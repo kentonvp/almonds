@@ -83,6 +83,8 @@ def create_transaction():
         datetime=datetime.datetime.strptime(
             request.form["transaction-date"], "%Y-%m-%d"
         ),
+        pending=False,
+        item_id=None,
     )
 
     crud_transaction.create_transaction(transaction)
@@ -91,6 +93,9 @@ def create_transaction():
 
 @transaction_bp.route("/update", methods=["POST"])
 def update_transaction():
+    tid = UUID(request.form["transaction-id"])
+    txn = crud_transaction.get_transaction_by_id(tid)
+
     is_expense = -1 if request.form["transaction-type"] == "expense" else 1
 
     transaction = Transaction(
@@ -102,6 +107,8 @@ def update_transaction():
         datetime=datetime.datetime.strptime(
             request.form["transaction-date"], "%Y-%m-%d"
         ),
+        pending="transaction-pending" in request.form,
+        item_id=txn.item_id,
     )
 
     crud_transaction.update_transaction(transaction)

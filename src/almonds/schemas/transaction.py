@@ -10,6 +10,8 @@ class TransactionBase(BaseModel):
     amount: float
     description: str
     datetime: datetime
+    pending: bool
+    item_id: UUID | None
 
 
 class Transaction(TransactionBase):

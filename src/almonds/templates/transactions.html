@@ -94,7 +94,12 @@
             {% for transaction in transactions %}
             <tr>
               <td>{{ transaction.datetime | format_date }}</td>
-              <td>{{ transaction.description }}</td>
+              <td>
+                {{ transaction.description }}
+                {% if transaction.pending %}
+                <span title="Pending">⏳</span>
+                {% endif %}
+              </td>
               <td>{{ transaction.category }}</td>
               <td
                 class="{{ 'text-success' if transaction.amount > 0 else 'text-danger' }}"
@@ -306,6 +311,10 @@
               <label for="edit-transaction-amount" class="form-label">Amount</label>
               <input type="number" class="form-control" id="edit-transaction-amount" name="transaction-amount" step="0.01" required>
             </div>
+            <div class="mb-3 form-check">
+              <label class="form-check-label" for="edit-transaction-pending">Pending</label>
+              <input class="form-check-input" type="checkbox" name="transaction-pending" id="edit-transaction-pending" >
+            </div>
             <div class="mb-3">
               <div class="form-check">
                 <input class="form-check-input" type="radio" name="transaction-type" id="edit-income" value="income">
@@ -358,6 +367,7 @@
             document.getElementById('edit-transaction-description').value = data.description;
             document.getElementById('edit-transaction-category').value = data.category_id;
             document.getElementById('edit-transaction-amount').value = Math.abs(data.amount);
+            document.getElementById('edit-transaction-pending').checked = data.pending;
             if (data.amount > 0) {
               document.getElementById('edit-income').checked = true;
             } else {
