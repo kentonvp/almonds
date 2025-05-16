@@ -26,7 +26,7 @@
             <ul class="list-unstyled mt-2 mb-0">
               <li><strong>Last Sync:</strong> <span class="text-body-secondary">[Placeholder]</span></li>
               <li><strong>Status:</strong> <span class="text-body-secondary">[Placeholder]</span></li>
-              <li><strong>Tracking:</strong> <span class="text-body-secondary">{{ item.products | title | join(', ') }}</span></li>
+              <li><strong>Tracking:</strong> <span class="text-body-secondary">{{ item.products | map('title') | join(', ') }}</span></li>
             </ul>
           </div>
           <button
