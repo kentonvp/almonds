@@ -70,10 +70,8 @@ def settings():
             }
         )
 
-    context = build_context()
-    return render_template(
-        "settings.html", current_page="settings", plaid_items=updated_items, **context
-    )
+    context = build_context(current_page="settings", plaid_items=updated_items)
+    return render_template("settings.html", **context)
 
 
 @root.route("/plaidLogin")
