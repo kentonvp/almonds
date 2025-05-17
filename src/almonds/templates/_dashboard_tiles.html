@@ -60,7 +60,7 @@
     <div class="card bg-success text-white h-100">
       <div class="card-body">
         <h3 class="card-title">Savings</h3>
-        <p class="card-text display-6 text-center">{{ user.savings_goal_progress }}%</p>
+        <p class="card-text display-6 text-center">{{ user.savings_goal_progress | round(1) }}%</p>
       </div>
     </div>
   </div>

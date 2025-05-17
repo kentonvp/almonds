@@ -169,13 +169,8 @@ def user_context() -> dict:
         total_balance (float)
         income_this_month (float)
         expenses_this_month (float)
-        savings_goal_progress: [
-            {
-                name (string)
-                progress (int)
-            },
-            ...
-        ]
+        savings_goal_progress (float)
+        last_month_savings (float)
         settings: (dict)
     }
     """
@@ -192,13 +187,32 @@ def user_context() -> dict:
         else:
             expense += txn.amount
 
+    savings = 0 if income == 0 else (income + expense) / income * 100
+
+    prev_transactions = crud_transaction.get_transactions_by_month(
+        session["user_id"],
+        datetime.date.today() - datetime.timedelta(days=datetime.date.today().day),
+    )
+    prev_income = 0.0
+    prev_expense = 0.0
+    for txn in prev_transactions:
+        if txn.amount > 0:
+            prev_income += txn.amount
+        else:
+            prev_expense += txn.amount
+    prev_savings = (
+        0 if prev_income == 0 else (prev_income + prev_expense) / prev_income * 100
+    )
+
     return {
         "user": {
             "username": session["username"],
             "total_balance": income + expense,
             "income_this_month": income,
             "expenses_this_month": abs(expense),
-            "savings_goal_progress": 0.0,
+            "savings_goal_progress": savings,
+            "last_month_savings": (prev_income + prev_expense),
+            "last_month_savings_change": prev_savings,
             "settings": crud_user_settings.get_user_settings(session["user_id"]),
         }
     }
