@@ -34,8 +34,6 @@ def view():
 
     context = build_context(
         current_page="root",
-        plaid_access_token=session.get("access_token"),
-        plaid_item_id=session.get("item_id"),
     )
 
     context |= user_context()
