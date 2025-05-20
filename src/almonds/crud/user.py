@@ -14,12 +14,14 @@ def create_user(user: UserBase, *, sessionmaker: sessionmaker_ = SessionLocal) -
         id=uuid4(),
         created_at=datetime.utcnow(),
         last_updated=datetime.utcnow(),
+        last_logged_in=datetime.utcnow(),
         **user.model_dump(),
     )
     model = UserModel(
         id=created_user.id,
         created_at=created_user.created_at,
         last_updated=created_user.last_updated,
+        last_logged_in=created_user.last_logged_in,
         email=created_user.email,
         username=created_user.username,
         password=created_user.password.get_secret_value(),
@@ -86,3 +88,27 @@ def delete_user(user_id: UUID, *, sessionmaker: sessionmaker_ = SessionLocal):
         stmt = delete(UserModel).where(UserModel.id == user_id)
         session.execute(stmt)
         session.commit()
+
+
+def mark_logged_in(
+    user_id: UUID, *, sessionmaker: sessionmaker_ = SessionLocal
+) -> None:
+    with sessionmaker() as session:
+        stmt = (
+            update(UserModel)
+            .where(UserModel.id == user_id)
+            .values(last_logged_in=datetime.utcnow())
+            .returning(UserModel)
+        )
+        session.scalars(stmt).first()
+        session.commit()
+
+
+def most_recently_logged_in(
+    limit: int = 10, *, sessionmaker: sessionmaker_ = SessionLocal
+) -> list[User]:
+    with sessionmaker() as session:
+        stmt = select(UserModel).order_by(UserModel.last_logged_in.desc()).limit(limit)
+        users = session.scalars(stmt).all()
+
+    return [User.model_validate(user) for user in users]

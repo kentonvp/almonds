@@ -19,6 +19,7 @@ def mock_user():
         password=SecretStr(hash_password("correctpassword")),
         created_at=datetime.strptime("2023-01-01T00:00:00", "%Y-%m-%dT%H:%M:%S"),
         last_updated=datetime.strptime("2023-01-01T00:00:00", "%Y-%m-%dT%H:%M:%S"),
+        last_logged_in=datetime.strptime("2023-01-01T00:00:00", "%Y-%m-%dT%H:%M:%S"),
     )
 
 
