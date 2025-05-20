@@ -31,7 +31,7 @@
           <div class="fs-3 fw-bold my-2">{{ user.last_month_savings | format_currency }}</div>
           {% if user.last_month_savings_change is defined %}
             <div class="{% if user.last_month_savings_change >= 0 %}text-success{% else %}text-danger{% endif %} small">
-              {% if user.last_month_savings_change >= 0 %}+{% endif %}{{ user.last_month_savings_change }}%
+              {% if user.last_month_savings_change >= 0 %}+{% endif %}{{ user.last_month_savings_change | round(2)}}%
             </div>
           {% endif %}
         </div>
