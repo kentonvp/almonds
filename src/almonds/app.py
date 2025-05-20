@@ -49,13 +49,6 @@ def create_app():
     def log_request_info():
         logger.info(f"Handling request: {request.method} {request.path}")
 
-    @app.errorhandler(Exception)
-    def handle_exception(e):
-        logger.error(f"An error occurred: {e}", exc_info=True)
-        return {
-            "error": "An internal error occurred"
-        }, status_code.HTTP_500_SERVER_ERROR
-
     @app.route("/metrics")
     def exports_metrics():
         logger.info("Serving custom metrics")
@@ -65,8 +58,19 @@ def create_app():
         return response_data, status_code.HTTP_200_OK, {"Content-Type": content_type}
 
     @app.errorhandler(status_code.HTTP_404_NOT_FOUND)
-    def not_found(e):
-        return render_template("404.html", **home.build_context())
+    def page_not_found(e):
+        return (
+            render_template("404.html", **home.build_context()),
+            status_code.HTTP_404_NOT_FOUND,
+        )
+
+    @app.errorhandler(Exception)
+    def server_error(e):
+        logger.error(f"Server error: {e}", exc_info=True)
+        return (
+            render_template("500.html", **home.build_context()),
+            status_code.HTTP_500_SERVER_ERROR,
+        )
 
     @app.errorhandler(CSRFError)
     def handle_csrf_error(e):
