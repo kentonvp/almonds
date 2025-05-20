@@ -5,8 +5,8 @@ from sqlalchemy.orm import sessionmaker as sessionmaker_
 from sqlalchemy.sql import select, update
 
 from almonds.db.database import SessionLocal
-from almonds.models.plaid_item import PlaidItem as PlaidItemModel
-from almonds.schemas.plaid_item import PlaidItem, PlaidItemBase
+from almonds.models.plaid.plaid_item import PlaidItem as PlaidItemModel
+from almonds.schemas.plaid.plaid_item import PlaidItem, PlaidItemBase
 
 
 def create_item(

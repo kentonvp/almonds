@@ -15,7 +15,7 @@ from flask import (
 import almonds.crud.budget as crud_budget
 import almonds.crud.category as crud_category
 import almonds.crud.goal as crud_goal
-import almonds.crud.plaid_item as crud_plaid_item
+import almonds.crud.plaid.plaid_item as crud_plaid_item
 import almonds.crud.transaction as crud_transaction
 import almonds.crud.user_settings as crud_user_settings
 from almonds.crypto.cryptograph import Cryptograph

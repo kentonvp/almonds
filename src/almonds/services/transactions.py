@@ -2,7 +2,7 @@ import datetime
 from concurrent.futures.thread import ThreadPoolExecutor
 from uuid import UUID
 
-from almonds.crud.plaid_item import get_items_for_user, update_cursor
+from almonds.crud.plaid.plaid_item import get_items_for_user, update_cursor
 from almonds.crud.transaction import create_transactions
 from almonds.crud.user import most_recently_logged_in
 from almonds.crypto.cryptograph import Cryptograph

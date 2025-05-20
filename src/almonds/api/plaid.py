@@ -2,9 +2,9 @@ from uuid import UUID
 
 from flask import Blueprint, request, session
 
-from almonds.crud import plaid_item as crud_plaid_item
+from almonds.crud.plaid import plaid_item as crud_plaid_item
 from almonds.crypto.cryptograph import Cryptograph
-from almonds.schemas.plaid_item import PlaidItemBase
+from almonds.schemas.plaid.plaid_item import PlaidItemBase
 from almonds.services.plaid import core
 
 plaid_bp = Blueprint("plaid", __name__)
