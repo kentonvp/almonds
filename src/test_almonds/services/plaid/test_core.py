@@ -54,6 +54,7 @@ def mock_plaid_client(monkeypatch):
                     "removed": [],
                     "has_more": True,
                     "next_cursor": "cursor-12345",
+                    "accounts": [{"account_id": "1"}, {"account_id": "2"}],
                 }
             else:
                 return {
@@ -62,6 +63,7 @@ def mock_plaid_client(monkeypatch):
                     "removed": [{"transaction_id": "2"}],
                     "has_more": False,
                     "next_cursor": "cursor-67890",
+                    "accounts": [{"account_id": "1"}, {"account_id": "2"}],
                 }
 
         def item_get(self, _: ItemGetRequest):
@@ -133,9 +135,9 @@ def test_sync_transactions(mock_plaid_client, monkeypatch):
     print(result)
 
     # Assert
-    assert len(result["added"]) == 2
-    assert len(result["modified"]) == 1
-    assert len(result["removed"]) == 1
+    assert len(result.added) == 2
+    assert len(result.modified) == 1
+    assert len(result.removed) == 1
 
 
 def test_get_item_info(mock_plaid_client):

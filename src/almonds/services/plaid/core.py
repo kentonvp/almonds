@@ -1,4 +1,5 @@
 import os
+from dataclasses import dataclass, field
 from uuid import UUID
 
 from plaid.model.accounts_balance_get_request import AccountsBalanceGetRequest
@@ -7,13 +8,22 @@ from plaid.model.item_get_request import ItemGetRequest
 from plaid.model.item_public_token_exchange_request import (
     ItemPublicTokenExchangeRequest,
 )
+from plaid.model.item_remove_request import ItemRemoveRequest
 from plaid.model.link_token_create_request import LinkTokenCreateRequest
 from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
 from plaid.model.products import Products
 from plaid.model.transactions_sync_request import TransactionsSyncRequest
 
-from almonds import config
 from almonds.services.plaid.client import client
+
+
+@dataclass
+class TransactionResult:
+    added: list = field(default_factory=list)
+    modified: list = field(default_factory=list)
+    removed: list = field(default_factory=list)
+    cursor: str | None = field(default=None)
+    accounts: list = field(default_factory=list)
 
 
 def create_link_token(user_id: UUID) -> str:
@@ -43,35 +53,43 @@ def get_balance(access_token: str) -> dict:
     return resp
 
 
-def sync_transactions(access_token: str, *, cursor: str | None = None) -> dict:
-    transactions = {}
-    transactions["added"] = []
-    transactions["modified"] = []
-    transactions["removed"] = []
-    transactions["cursor"] = cursor
-    has_more = True
+def sync_transactions(
+    access_token: str, *, cursor: str | None = None
+) -> TransactionResult:
+    result = TransactionResult()
 
     # the transactions in the responses are paginated, so make multiple calls
     # while incrementing the cursor to retrieve all transactions
+    has_more = True
     while has_more:
         req = TransactionsSyncRequest(
-            access_token=access_token,
-            cursor=transactions["cursor"],
-            _check_type=config.ALMONDS_ENV,
+            access_token=access_token, cursor=result.cursor, _check_type=False
         )
         resp = client.transactions_sync(req)
 
-        transactions["added"].extend(resp["added"])
-        transactions["modified"].extend(resp["modified"])
-        transactions["removed"].extend(resp["removed"])
-        transactions["cursor"] = resp["next_cursor"]
+        result.added.extend(resp["added"])
+        result.modified.extend(resp["modified"])
+        result.removed.extend(resp["removed"])
+
+        result.cursor = resp["next_cursor"]
+        result.accounts = resp["accounts"]
 
         has_more = resp["has_more"]
 
-    return transactions
+    return result
 
 
 def get_item_info(access_token: str) -> dict:
     req = ItemGetRequest(access_token=access_token)
     resp = client.item_get(req)
     return resp["item"]
+
+
+def remove_item(access_token: str) -> bool:
+    request = ItemRemoveRequest(access_token=access_token)
+    response = client.item_remove(request)
+
+    if response:
+        return True
+
+    return False
