@@ -237,7 +237,7 @@ def top_expenses() -> dict:
     categories = {}
     category_ids = {}
     for txn in transactions:
-        if txn.amount > 0:
+        if txn.amount > 0 or txn.category_id is None:
             continue
 
         if txn.category_id not in category_ids:

@@ -33,9 +33,15 @@ def view(page: int):
         limit=TRANSACTION_LIMIT,
         offset=(page - 1) * TRANSACTION_LIMIT,
     )
+
+    user_categories = crud_category.get_categories_by_user(session["user_id"])
+    categories_map = {}
+    for c in user_categories:
+        categories_map[c.id] = c.name
+
     display_transactions = [
         txn.model_dump()
-        | {"category": crud_category.get_category_by_id(txn.category_id).name}
+        | {"category": categories_map.get(txn.category_id, "Uncategorized")}
         for txn in page_transactions
     ]
 
@@ -45,7 +51,7 @@ def view(page: int):
 
     context = build_context()
     context |= {
-        "categories": crud_category.get_categories_by_user(session["user_id"]),
+        "categories": user_categories,
         "transactions": display_transactions,
         "pagination": {"page_n": page, "total_pages": total_pages},
     }
@@ -141,11 +147,16 @@ def filter_form():
     print(f"{type_=}")
     print(f"{search=}")
 
+    categories_map = {}
+    user_categories = crud_category.get_categories_by_user(session["user_id"])
+    for c in user_categories:
+        categories_map[c.id] = c.name
+
     # TODO: Do the filtering in SQL
     transactions = crud_transaction.get_transactions_by_user(session["user_id"])
     display_transactions = [
         txn.model_dump()
-        | {"category": crud_category.get_category_by_id(txn.category_id).name}
+        | {"category": categories_map.get(txn.category_id, "Uncategorized")}
         for txn in transactions
         if (
             txn.datetime
@@ -164,7 +175,7 @@ def filter_form():
 
     context = build_context()
     context |= {
-        "categories": crud_category.get_categories_by_user(session["user_id"]),
+        "categories": user_categories,
         "transactions": display_transactions,
         "pagination": {"page_n": 1, "total_pages": total_pages},
     }
