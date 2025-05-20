@@ -16,6 +16,8 @@ def sample_transaction_base():
         amount=100.00,
         description="Transaction Description",
         datetime=datetime.datetime.utcnow(),  # TODO: utcnow() is being deprecated
+        pending=False,
+        item_id=None,
     )
 
 
@@ -31,6 +33,15 @@ def test_create_transaction(sessionmaker_test, sample_transaction_base):
     assert created_transaction.datetime == sample_transaction_base.datetime
     assert created_transaction.user_id == sample_transaction_base.user_id
     assert created_transaction.category_id == sample_transaction_base.category_id
+
+
+def test_create_transactions(sessionmaker_test, sample_transaction_base):
+    created_transactions = crud_transaction.create_transactions(
+        [sample_transaction_base, sample_transaction_base],
+        sessionmaker=sessionmaker_test,
+    )
+
+    assert created_transactions == 2
 
 
 def test_get_transaction_by_id(sessionmaker_test, sample_transaction_base):
@@ -235,6 +246,8 @@ def test_count_transactions_by_month(sessionmaker_test, sample_transaction_base)
         amount=sample_transaction_base.amount,
         description=sample_transaction_base.description,
         datetime=sample_transaction_base.datetime - datetime.timedelta(days=45),
+        pending=sample_transaction_base.pending,
+        item_id=sample_transaction_base.item_id,
     )
 
     for _ in range(5):

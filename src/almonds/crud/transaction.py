@@ -23,6 +23,22 @@ def create_transaction(
     return created_transaction
 
 
+def create_transactions(
+    transactions: list[TransactionBase], *, sessionmaker: sessionmaker_ = SessionLocal
+) -> int:
+    models = []
+    for transaction in transactions:
+        created_transaction = Transaction(id=uuid4(), **transaction.model_dump())
+        model = TransactionModel(**created_transaction.model_dump())
+        models.append(model)
+
+    with sessionmaker() as session:
+        session.add_all(models)
+        session.commit()
+
+    return len(models)
+
+
 def count_transactions(
     user_id: UUID, *, sessionmaker: sessionmaker_ = SessionLocal
 ) -> int:
@@ -148,7 +164,7 @@ def get_transactions_by_month(
 
 def count_transactions_by_month(
     user_id: UUID,
-    today: datetime.date = None,
+    today: datetime.date | None = None,
     *,
     sessionmaker: sessionmaker_ = SessionLocal,
 ) -> int:
