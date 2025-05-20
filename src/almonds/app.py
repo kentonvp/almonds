@@ -1,5 +1,8 @@
+import datetime
 import os
 
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
 from flask import Flask, render_template, request
 from flask_wtf.csrf import CSRFError, CSRFProtect
 from prometheus_flask_exporter import PrometheusMetrics
@@ -11,7 +14,9 @@ from almonds.api.home import root
 from almonds.api.login import login_bp
 from almonds.api.plaid import plaid_bp
 from almonds.api.transactions import transaction_bp
+from almonds.crypto.cryptograph import Cryptograph
 from almonds.db.base import Base, engine
+from almonds.services.transactions import sync_transactions
 from almonds.templates.filters import format_currency, format_date, format_dollars
 from almonds.utils import status_code
 from almonds.utils.logging import logger
@@ -81,3 +86,20 @@ def create_app():
         )
 
     return app
+
+
+def task_scheduler() -> BackgroundScheduler:
+    cryptograph = Cryptograph()
+
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(
+        func=sync_transactions,
+        trigger=CronTrigger.from_crontab("0 */4 * * *"),
+        kwargs={"cryptograph": cryptograph},
+        id="sync_transactions",
+        coalesce=False,
+        replace_existing=True,
+        next_run_time=datetime.datetime.now(),
+    )
+
+    return scheduler

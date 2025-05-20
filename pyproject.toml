@@ -16,7 +16,8 @@ dependencies = [
   "pandas >= 2.2, < 3",
   "plotly >= 6.0, < 7",
   "prometheus-flask-exporter >= 0.23, < 1",
-  "cryptography >= 44.0, < 45"
+  "cryptography >= 44.0, < 45",
+  "apscheduler >= 3.11.0, < 4"
 ]
 
 [project.optional-dependencies]
