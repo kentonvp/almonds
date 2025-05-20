@@ -16,3 +16,5 @@ class PlaidItem(PlaidItemBase):
     id: UUID
     created_at: datetime
     expired: bool
+    cursor: str | None
+    synced_at: datetime | None

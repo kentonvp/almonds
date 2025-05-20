@@ -13,3 +13,5 @@ class PlaidItem(Base):
     item_id = Column(String, nullable=False)
     created_at = Column(DateTime, nullable=False)
     expired = Column(Boolean, nullable=False)
+    cursor = Column(String(length=256), nullable=True)
+    synced_at = Column(DateTime, nullable=True)

@@ -2,7 +2,7 @@ from datetime import datetime
 from uuid import UUID, uuid4
 
 from sqlalchemy.orm import sessionmaker as sessionmaker_
-from sqlalchemy.sql import delete, select
+from sqlalchemy.sql import select, update
 
 from almonds.db.database import SessionLocal
 from almonds.models.plaid_item import PlaidItem as PlaidItemModel
@@ -13,7 +13,11 @@ def create_item(
     item: PlaidItemBase, *, sessionmaker: sessionmaker_ = SessionLocal
 ) -> PlaidItem:
     created_item = PlaidItem(
-        id=uuid4(), created_at=datetime.utcnow(), expired=False, **item.model_dump()
+        id=uuid4(),
+        created_at=datetime.utcnow(),
+        expired=False,
+        cursor=None,
+        **item.model_dump(),
     )
     model = PlaidItemModel(
         id=created_item.id,
@@ -22,6 +26,8 @@ def create_item(
         item_id=created_item.item_id,
         created_at=created_item.created_at,
         expired=created_item.expired,
+        cursor=created_item.cursor,
+        synced_at=created_item.synced_at,
     )
 
     with sessionmaker() as session:
@@ -56,6 +62,21 @@ def get_items_for_user(
 
 def delete_item(id: UUID, *, sessionmaker: sessionmaker_ = SessionLocal) -> None:
     with sessionmaker() as session:
-        stmt = delete(PlaidItemModel).where(PlaidItemModel.id == id)
+        stmt = (
+            update(PlaidItemModel).where(PlaidItemModel.id == id).values(expired=True)
+        )
+        session.execute(stmt)
+        session.commit()
+
+
+def update_cursor(
+    item_id: UUID, cursor: str | None, *, sessionmaker: sessionmaker_ = SessionLocal
+) -> None:
+    with sessionmaker() as session:
+        stmt = (
+            update(PlaidItemModel)
+            .where(PlaidItemModel.id == item_id)
+            .values(cursor=cursor, synced_at=datetime.utcnow())
+        )
         session.execute(stmt)
         session.commit()
