@@ -92,9 +92,13 @@
           </thead>
           <tbody id="transactions-body">
             {% for transaction in transactions %}
-            <tr>
+            <tr
+              {% if transaction.category_id is none %}
+                class="table-warning"
+              {% endif %}
+            >
               <td>{{ transaction.datetime | format_date }}</td>
-              <td>
+              <td class="w-25 text-wrap text-break">
                 {{ transaction.description }}
                 {% if transaction.pending %}
                 <span title="Pending">⏳</span>
