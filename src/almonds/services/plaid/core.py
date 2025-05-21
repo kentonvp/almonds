@@ -2,7 +2,6 @@ import os
 from dataclasses import dataclass, field
 from uuid import UUID
 
-from plaid.model.accounts_balance_get_request import AccountsBalanceGetRequest
 from plaid.model.country_code import CountryCode
 from plaid.model.item_get_request import ItemGetRequest
 from plaid.model.item_public_token_exchange_request import (
@@ -44,12 +43,6 @@ def create_link_token(user_id: UUID) -> str:
 def exchange_public_token(public_token: str) -> dict:
     req = ItemPublicTokenExchangeRequest(public_token=public_token)
     resp = client.item_public_token_exchange(req)
-    return resp
-
-
-def get_balance(access_token: str) -> dict:
-    req = AccountsBalanceGetRequest(access_token=access_token)
-    resp = client.accounts_balance_get(req)
     return resp
 
 

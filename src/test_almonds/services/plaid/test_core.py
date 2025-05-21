@@ -12,7 +12,6 @@ from plaid.model.transactions_sync_request import TransactionsSyncRequest
 from almonds.services.plaid.core import (
     create_link_token,
     exchange_public_token,
-    get_balance,
     get_item_info,
     sync_transactions,
 )
@@ -108,20 +107,6 @@ def test_exchange_public_token(mock_plaid_client):
     # Assert
     assert result["access_token"] == "access-sandbox-12345"
     assert result["item_id"] == "item-sandbox-12345"
-
-
-def test_get_balance(mock_plaid_client):
-    # Arrange
-    access_token = "access-sandbox-12345"
-
-    # Act
-    result = get_balance(access_token)
-
-    # Assert
-    assert "accounts" in result
-    assert len(result["accounts"]) == 1
-    assert result["accounts"][0]["balances"]["available"] == 100.00
-    assert result["accounts"][0]["balances"]["current"] == 110.00
 
 
 def test_sync_transactions(mock_plaid_client, monkeypatch):
