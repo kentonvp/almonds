@@ -17,18 +17,10 @@ def create_item(
         created_at=datetime.utcnow(),
         expired=False,
         cursor=None,
+        synced_at=None,
         **item.model_dump(),
     )
-    model = PlaidItemModel(
-        id=created_item.id,
-        user_id=created_item.user_id,
-        access_token=created_item.access_token,
-        item_id=created_item.item_id,
-        created_at=created_item.created_at,
-        expired=created_item.expired,
-        cursor=created_item.cursor,
-        synced_at=created_item.synced_at,
-    )
+    model = PlaidItemModel(**created_item.model_dump())
 
     with sessionmaker() as session:
         session.add(model)
