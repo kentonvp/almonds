@@ -130,7 +130,20 @@ def set_theme():
     data = request.get_json()
     theme = data.get("theme")
 
+    # validate theme
+    if theme not in ("light", "dark"):
+        return (
+            jsonify({"error": "Theme must be either 'light' or 'dark'."}),
+            status_code.HTTP_400_BAD_REQUEST,
+        )
+
     session["theme"] = theme
+
+    if "user_id" in session:
+        crud_user_settings.update_user_settings(
+            session["user_id"],
+            {"theme": theme},
+        )
     return (
         jsonify({"message": f"Theme set to {theme} in session."}),
         status_code.HTTP_200_OK,
@@ -159,6 +172,11 @@ def get_active_chart() -> str:
 
 
 def get_theme() -> str:
+    if "user_id" in session:
+        user_settings = crud_user_settings.get_user_settings(session["user_id"])
+        if user_settings:
+            return user_settings.get("theme", "light")
+
     return session.get("theme", "light")
 
 
