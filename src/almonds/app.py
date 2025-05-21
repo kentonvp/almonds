@@ -3,7 +3,7 @@ import os
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, session
 from flask_wtf.csrf import CSRFError, CSRFProtect
 from prometheus_flask_exporter import PrometheusMetrics
 
@@ -39,9 +39,14 @@ def create_app():
 
     app.secret_key = os.getenv("ALMONDS_SECRET")
 
-    app.jinja_env.filters["format_currency"] = format_currency
-    app.jinja_env.filters["format_date"] = format_date
-    app.jinja_env.filters["format_dollars"] = format_dollars
+    # Set the default session lifetime to 15 minutes.
+    app.config["PERMANENT_SESSION_LIFETIME"] = datetime.timedelta(minutes=15)
+
+    app.jinja_env.filters |= {
+        "format_currency": format_currency,
+        "format_date": format_date,
+        "format_dollars": format_dollars,
+    }
 
     app.register_blueprint(root)
     app.register_blueprint(login_bp)
@@ -49,6 +54,11 @@ def create_app():
     app.register_blueprint(transaction_bp, url_prefix="/transactions")
     app.register_blueprint(budget_bp, url_prefix="/budget")
     app.register_blueprint(goal_bp, url_prefix="/goals")
+
+    @app.before_request
+    def update_session_lifetime():
+        session.permanent = True
+        app.permanent_session_lifetime = datetime.timedelta(minutes=15)
 
     @app.before_request
     def log_request_info():
