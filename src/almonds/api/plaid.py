@@ -2,20 +2,21 @@ from uuid import UUID
 
 from flask import Blueprint, request, session
 
+import almonds.services.plaid.core as plaid_core
 from almonds.crud.plaid import plaid_item as crud_plaid_item
 from almonds.crypto.cryptograph import Cryptograph
 from almonds.schemas.plaid.plaid_item import PlaidItemBase
-from almonds.services.plaid import core
 
 plaid_bp = Blueprint("plaid", __name__)
 
 
 @plaid_bp.route("/createLinkToken")
 def create_link_token():
-    user_id = (session.get("user_id", None),)
+    user_id = session.get("user_id", None)
     if user_id is None:
         return {"error": "user_id not set"}
-    link_token = core.create_link_token(user_id)
+
+    link_token = plaid_core.create_link_token(user_id)
     return {"link_token": link_token}
 
 
@@ -25,7 +26,7 @@ def exchange_public_token():
         return {"public_token_exchange": "ERROR"}
 
     body = request.get_json()
-    resp = core.exchange_public_token(body["public_token"])
+    resp = plaid_core.exchange_public_token(body["public_token"])
 
     # Encrypt the data.
     crypto = Cryptograph()
@@ -50,6 +51,12 @@ def is_account_connected():
 def delete_access_token():
     body = request.get_json()
     item_id = UUID(body["id"])
+    item = crud_plaid_item.get_item(item_id)
+
+    # validate
+    if item is None:
+        return {"status": "not found"}, 404
+
     crud_plaid_item.delete_item(item_id)
 
     return {"status": "deleted"}
