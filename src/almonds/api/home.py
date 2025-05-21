@@ -61,7 +61,12 @@ def settings():
     for it in items:
         item_info = core.get_item_info(crypto.decrypt(it.access_token))
         updated_items.append(
-            it.model_dump()
+            it.model_dump(
+                include={
+                    "created_at",
+                    "synced_at",
+                }
+            )
             | {
                 "institution_name": item_info["institution_name"],
                 "products": item_info["products"],

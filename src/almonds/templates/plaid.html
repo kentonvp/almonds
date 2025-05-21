@@ -25,7 +25,6 @@
             <small class="text-secondary">Linked on {{ item.created_at | format_date }}</small>
             <ul class="list-unstyled mt-2 mb-0">
               <li><strong>Last Sync:</strong> <span class="text-body-secondary">{{ item.synced_at | default("NOT SYNCED", true) }}</span></li>
-              <li><strong>Status:</strong> <span class="text-body-secondary">[Placeholder]</span></li>
               <li><strong>Tracking:</strong> <span class="text-body-secondary">{{ item.products | map('title') | join(', ') }}</span></li>
             </ul>
           </div>
