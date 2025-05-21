@@ -16,7 +16,7 @@ from almonds.api.plaid import plaid_bp
 from almonds.api.transactions import transaction_bp
 from almonds.crypto.cryptograph import Cryptograph
 from almonds.db.base import Base, engine
-from almonds.services.transactions import sync_transactions
+from almonds.services import plaid_sync
 from almonds.templates.filters import format_currency, format_date, format_dollars
 from almonds.utils import status_code
 from almonds.utils.logging import logger
@@ -93,10 +93,10 @@ def task_scheduler() -> BackgroundScheduler:
 
     scheduler = BackgroundScheduler()
     scheduler.add_job(
-        func=sync_transactions,
+        func=plaid_sync.sync,
         trigger=CronTrigger.from_crontab("0 */4 * * *"),
         kwargs={"cryptograph": cryptograph},
-        id="sync_transactions",
+        id="plaid_sync",
         coalesce=False,
         replace_existing=True,
         next_run_time=datetime.datetime.now(),
