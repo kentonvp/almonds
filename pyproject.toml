@@ -26,6 +26,7 @@ dev = [
   "pre-commit",
   "coverage",
   "pytest-cov",
+  "rich"
 ]
 
 [tool.isort]
