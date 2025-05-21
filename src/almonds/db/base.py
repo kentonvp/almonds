@@ -12,4 +12,6 @@ from almonds.models.transaction import Transaction
 from almonds.models.user import User
 from almonds.models.plaid.plaid_item import PlaidItem
 from almonds.models.user_settings import UserSetting
+
 from almonds.models.plaid.account import PlaidAccount
+from almonds.models.plaid.transaction import PlaidTransaction
