@@ -62,7 +62,7 @@ def added_transactions_handler(transactions: list, *, user_id: UUID, item_id: UU
         t = parse_transaction(txn, user_id=user_id, item_id=item_id)
 
         # check if transaction has been pulled already
-        if plaid_transaction.get_transaction_by_plaid_id(txn["account_id"]):
+        if plaid_transaction.get_transaction_by_plaid_id(txn["transaction_id"]):
             continue
 
         # add plaid_transaction (todo: batch like crud_transaction?)
