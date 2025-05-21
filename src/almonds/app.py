@@ -97,7 +97,7 @@ def task_scheduler() -> BackgroundScheduler:
         trigger=CronTrigger.from_crontab("0 */4 * * *"),
         kwargs={"cryptograph": cryptograph},
         id="plaid_sync",
-        coalesce=False,
+        coalesce=True,
         replace_existing=True,
         next_run_time=datetime.datetime.now(),
     )
