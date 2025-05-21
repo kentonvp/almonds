@@ -36,7 +36,6 @@ def exchange_public_token():
         access_token=crypto.encrypt(resp["access_token"]),
         item_id=crypto.encrypt(resp["item_id"]),
     )
-    print(f"Plaid Item: {item}")
     crud_plaid_item.create_item(item)
 
     return {"public_token_exchange": "complete"}

@@ -117,7 +117,6 @@ def update_budget():
 @budget_bp.route("/delete", methods=["POST"])
 def delete_budget():
     body = request.get_json()
-    print(f"{body=}")
     budget_id = UUID(body["budget_id"])
     crud_budget.delete_budget(budget_id)
     return redirect(url_for("budget.view"))

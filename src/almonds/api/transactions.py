@@ -142,10 +142,6 @@ def filter_form():
     category = request.form["category"]
     type_ = request.form["type"]
     search = request.form["search"]
-    print(f"{recent_days=}")
-    print(f"{category=}")
-    print(f"{type_=}")
-    print(f"{search=}")
 
     categories_map = {}
     user_categories = crud_category.get_categories_by_user(session["user_id"])

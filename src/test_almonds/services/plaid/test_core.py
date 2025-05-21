@@ -90,21 +90,14 @@ def sample_user_id():
 def test_create_link_token(mock_plaid_client, sample_user_id, monkeypatch):
     monkeypatch.setenv("PLAID_SANDBOX_REDIRECT_URI", "https://127.0.0.1:5000/oath")
 
-    # Act
     result = create_link_token(sample_user_id)
-
-    # Assert
     assert result == "link-sandbox-12345"
 
 
 def test_exchange_public_token(mock_plaid_client):
-    # Arrange
     public_token = "public-sandbox-12345"
 
-    # Act
     result = exchange_public_token(public_token)
-
-    # Assert
     assert result["access_token"] == "access-sandbox-12345"
     assert result["item_id"] == "item-sandbox-12345"
 
@@ -112,27 +105,18 @@ def test_exchange_public_token(mock_plaid_client):
 def test_sync_transactions(mock_plaid_client, monkeypatch):
     monkeypatch.setenv("ALMONDS_ENVIRONMENT", "sandbox")
 
-    # Arrange
     access_token = "access-sandbox-12345"
 
-    # Act
     result = sync_transactions(access_token)
-    print(result)
-
-    # Assert
     assert len(result.added) == 2
     assert len(result.modified) == 1
     assert len(result.removed) == 1
 
 
 def test_get_item_info(mock_plaid_client):
-    # Arrange
     access_token = "access-sandbox-12345"
 
-    # Act
     result = get_item_info(access_token)
-
-    # Assert
     assert result["item_id"] == "item-sandbox-12345"
     assert result["institution_id"] == "ins_12345"
     assert result["institution_name"] == "First Platypus Bank"

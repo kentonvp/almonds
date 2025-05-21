@@ -73,13 +73,11 @@ def test_update_category(sessionmaker_test, sample_category_base):
     created_category = create_category(
         sample_category_base, sessionmaker=sessionmaker_test
     )
-    print(f"{created_category}")
 
     new_name = "New Name"
     created_category.name = new_name
 
     update_category(created_category, sessionmaker=sessionmaker_test)
-    print(f"{created_category}")
 
     categories = get_categories_by_user(
         created_category.user_id, sessionmaker=sessionmaker_test
