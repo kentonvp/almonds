@@ -132,7 +132,7 @@
             <span class="badge bg-success rounded-pill">{{ (goal.current_amount / goal.target_amount * 100) | round | int }}%</span>
           </li>
           {% else %}
-          <li class="list-group-item text-muted text-center">No goals set. <a href="{{ url_for('goals.add') }}">Add one?</a></li>
+          <li class="list-group-item text-muted text-center">No goals set. <a href="{{ url_for('goal.view') }}">Add one?</a></li>
           {% endfor %}
         </ul>
       </div>
