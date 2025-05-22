@@ -10,16 +10,19 @@ from almonds.schemas.plaid.transaction import PlaidTransactionBase
 
 
 def test_create_and_get_transaction(sessionmaker_test):
+    user_id = uuid4()
     account_id = "account_abc"
     plaid_transaction_id = "plaid_txn_123"
 
     txn_base = PlaidTransactionBase(
+        user_id=user_id,
         account_id=account_id,
         transaction_id=plaid_transaction_id,
     )
 
     # Create
     created = create_transaction(txn_base, sessionmaker=sessionmaker_test)
+    assert created.user_id == user_id
     assert created.account_id == account_id
     assert created.transaction_id == plaid_transaction_id
     assert created.id is not None
@@ -28,6 +31,7 @@ def test_create_and_get_transaction(sessionmaker_test):
     fetched = get_transaction(created.id, sessionmaker=sessionmaker_test)
     assert fetched is not None
     assert fetched.id == created.id
+    assert fetched.user_id == user_id
     assert fetched.account_id == account_id
     assert fetched.transaction_id == plaid_transaction_id
 
@@ -49,10 +53,12 @@ def test_get_transaction_not_found(sessionmaker_test):
 
 
 def test_delete_transaction(sessionmaker_test):
+    user_id = uuid4()
     account_id = "account_del"
     plaid_transaction_id = "plaid_txn_del"
 
     txn_base = PlaidTransactionBase(
+        user_id=user_id,
         account_id=account_id,
         transaction_id=plaid_transaction_id,
     )
