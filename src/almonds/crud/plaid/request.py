@@ -1,3 +1,4 @@
+import datetime
 from uuid import UUID, uuid4
 
 from sqlalchemy.orm import sessionmaker as sessionmaker_
@@ -13,6 +14,7 @@ def create_request(
 ) -> Request:
     created_log = Request(
         id=uuid4(),
+        created_at=datetime.datetime.utcnow(),
         **request.model_dump(),
     )
 
