@@ -97,7 +97,7 @@ def update_accounts_handler(accounts: list, *, user_id: UUID):
 def sync_user(user: User, *, cryptograph: Cryptograph):
     """Sync plaid transactions for a user."""
 
-    items = plaid_item.get_items_for_user(user.id)
+    items = plaid_item.get_active_items_for_user(user.id)
 
     for it in items:
         access_token = cryptograph.decrypt(it.access_token)

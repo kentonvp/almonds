@@ -52,6 +52,18 @@ def get_items_for_user(
     return [PlaidItem.model_validate(it) for it in items]
 
 
+def get_active_items_for_user(
+    user_id: UUID, *, sessionmaker: sessionmaker_ = SessionLocal
+) -> list[PlaidItem]:
+    with sessionmaker() as session:
+        stmt = select(PlaidItemModel).where(
+            PlaidItemModel.user_id == user_id, PlaidItemModel.expired == False  # noqa
+        )
+        items = session.scalars(stmt).all()
+
+    return [PlaidItem.model_validate(it) for it in items]
+
+
 def delete_item(id: UUID, *, sessionmaker: sessionmaker_ = SessionLocal) -> None:
     with sessionmaker() as session:
         stmt = (

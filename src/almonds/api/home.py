@@ -56,7 +56,7 @@ def settings():
     # Decrypt.
     crypto = Cryptograph()
 
-    items = crud_plaid_item.get_items_for_user(session["user_id"])
+    items = crud_plaid_item.get_active_items_for_user(session["user_id"])
     updated_items = []
     for it in items:
         item_info = plaid_core.get_item_info(
@@ -65,6 +65,7 @@ def settings():
         updated_items.append(
             it.model_dump(
                 include={
+                    "id",
                     "created_at",
                     "synced_at",
                 }
