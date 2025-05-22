@@ -28,8 +28,7 @@ def view(page: int):
     if "username" not in session:
         return redirect(url_for("root.view"))
 
-    # set "visit_page"
-    session["visit_page"] = page
+    set_page_number(page)
 
     page_transactions = crud_transaction.get_transactions_by_user(
         session["user_id"],
@@ -92,7 +91,7 @@ def create_transaction():
     )
 
     crud_transaction.create_transaction(transaction)
-    return redirect(url_for("transactions.view"))
+    return redirect(url_for("transactions.view", page=get_page_number()))
 
 
 @transaction_bp.route("/update", methods=["POST"])
@@ -116,7 +115,7 @@ def update_transaction():
     )
 
     crud_transaction.update_transaction(transaction)
-    return redirect(url_for("transactions.view"))
+    return redirect(url_for("transactions.view", page=get_page_number()))
 
 
 @transaction_bp.route("/delete", methods=["POST"])
@@ -131,7 +130,7 @@ def delete_transaction():
 
     transaction_id = UUID(body["transaction_id"])
     crud_transaction.delete_transaction(transaction_id)
-    return redirect(url_for("transactions.view"))
+    return redirect(url_for("transactions.view", page=get_page_number()))
 
 
 @transaction_bp.route("/filter", methods=["POST"])
@@ -175,14 +174,22 @@ def filter_form():
 
 @transaction_bp.route("/resetFilter", methods=["POST"])
 def reset_filter():
-    return redirect(url_for("transactions.view"))
+    return redirect(url_for("transactions.view", page=get_page_number()))
+
+
+def get_page_number() -> int:
+    return session.get("page_num", 1)
+
+
+def set_page_number(page: int) -> None:
+    session["page_num"] = page
 
 
 def get_pagination_page() -> dict:
     """
     Get the page number from the session or default to 1.
     """
-    page = session.get("visit_page", 1)
+    page = get_page_number()
 
     total_pages = (
         crud_transaction.count_transactions(session["user_id"]) // TRANSACTION_LIMIT + 1
