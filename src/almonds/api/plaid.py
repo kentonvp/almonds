@@ -69,4 +69,8 @@ def delete_access_token():
 
     crud_plaid_item.delete_item(item_id)
 
+    crypto = Cryptograph()
+
+    plaid_core.remove_item(item.user_id, crypto.decrypt(item.access_token))
+
     return {"status": "deleted"}
