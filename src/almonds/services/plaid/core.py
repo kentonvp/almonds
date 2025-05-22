@@ -38,7 +38,7 @@ def create_link_token(user_id: UUID) -> str:
             language="en",
             products=[Products("transactions")],
             country_codes=[CountryCode("US")],
-            redirect_uri=os.getenv("PLAID_SANDBOX_REDIRECT_URI"),
+            redirect_uri=os.getenv("PLAID_REDIRECT_URI"),
         )
     )
 
