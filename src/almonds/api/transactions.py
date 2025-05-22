@@ -28,6 +28,9 @@ def view(page: int):
     if "username" not in session:
         return redirect(url_for("root.view"))
 
+    # set "visit_page"
+    session["visit_page"] = page
+
     page_transactions = crud_transaction.get_transactions_by_user(
         session["user_id"],
         limit=TRANSACTION_LIMIT,
@@ -45,15 +48,10 @@ def view(page: int):
         for txn in page_transactions
     ]
 
-    total_pages = (
-        crud_transaction.count_transactions(session["user_id"]) // TRANSACTION_LIMIT + 1
-    )
-
     context = build_context()
     context |= {
         "categories": user_categories,
         "transactions": display_transactions,
-        "pagination": {"page_n": page, "total_pages": total_pages},
     }
     return render_template("transactions.html", **context)
 
@@ -183,11 +181,24 @@ def reset_filter():
     return redirect(url_for("transactions.view"))
 
 
+def get_pagination_page() -> dict:
+    """
+    Get the page number from the session or default to 1.
+    """
+    page = session.get("visit_page", 1)
+
+    total_pages = (
+        crud_transaction.count_transactions(session["user_id"]) // TRANSACTION_LIMIT + 1
+    )
+    return {"pagination": {"page_n": page, "total_pages": total_pages}}
+
+
 def build_context(**kwargs) -> dict:
-    base = home.build_context()
-    context = base | {
+    context = home.build_context()
+    context |= {
         "title": "Transactions",
         "user": {"username": session["username"]},
         "current_page": "transactions",
     }
+    context |= get_pagination_page()
     return context | kwargs
