@@ -13,6 +13,7 @@ from almonds.schemas.plaid.transaction import PlaidTransactionBase
 from almonds.schemas.transaction import TransactionBase
 from almonds.schemas.user import User
 from almonds.services.plaid import core as plaid_core
+from almonds.services.plaid_transaction_category_map import PLAID_TO_ALMONDS_CATEGORY
 
 
 def parse_transaction(
@@ -31,9 +32,15 @@ def parse_transaction(
 
     pending = transaction["pending"]
 
+    category_id = None
+    pf_cat = transaction.get("personal_finance_category")
+    if pf_cat and "HIGH" in pf_cat["confidence_level"]:
+        detailed = pf_cat["detailed"]
+        category_id = PLAID_TO_ALMONDS_CATEGORY.get(detailed)
+
     return TransactionBase(
         user_id=user_id,
-        category_id=None,
+        category_id=category_id,
         amount=amount,
         description=merchant_name,
         datetime=dt,
@@ -59,11 +66,11 @@ def added_transactions_handler(transactions: list, *, user_id: UUID, item_id: UU
 
     added: list[TransactionBase] = []
     for txn in transactions:
-        t = parse_transaction(txn, user_id=user_id, item_id=item_id)
-
         # check if transaction has been pulled already
         if plaid_transaction.get_transaction_by_plaid_id(txn["transaction_id"]):
             continue
+
+        t = parse_transaction(txn, user_id=user_id, item_id=item_id)
 
         # add plaid_transaction (todo: batch like crud_transaction?)
         plaid_transaction.create_transaction(
