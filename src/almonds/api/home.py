@@ -18,9 +18,9 @@ import almonds.crud.goal as crud_goal
 import almonds.crud.plaid.plaid_item as crud_plaid_item
 import almonds.crud.transaction as crud_transaction
 import almonds.crud.user_settings as crud_user_settings
+import almonds.services.plaid.core as plaid_core
 from almonds.crypto.cryptograph import Cryptograph
 from almonds.services import charts
-from almonds.services.plaid import core
 from almonds.utils import status_code, ui
 
 root = Blueprint("root", __name__)
@@ -59,7 +59,9 @@ def settings():
     items = crud_plaid_item.get_items_for_user(session["user_id"])
     updated_items = []
     for it in items:
-        item_info = core.get_item_info(crypto.decrypt(it.access_token))
+        item_info = plaid_core.get_item_info(
+            session["user_id"], crypto.decrypt(it.access_token)
+        )
         updated_items.append(
             it.model_dump(
                 include={

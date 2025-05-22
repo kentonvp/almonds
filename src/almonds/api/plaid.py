@@ -26,7 +26,7 @@ def exchange_public_token():
         return {"public_token_exchange": "ERROR"}
 
     body = request.get_json()
-    resp = plaid_core.exchange_public_token(body["public_token"])
+    resp = plaid_core.exchange_public_token(session["user_id"], body["public_token"])
 
     # Encrypt the data.
     crypto = Cryptograph()

@@ -102,7 +102,7 @@ def sync_user(user: User, *, cryptograph: Cryptograph):
     for it in items:
         access_token = cryptograph.decrypt(it.access_token)
 
-        result = plaid_core.sync_transactions(access_token, cursor=it.cursor)
+        result = plaid_core.sync_transactions(user.id, access_token, cursor=it.cursor)
 
         # update accounts
         update_accounts_handler(result.accounts, user_id=user.id)
