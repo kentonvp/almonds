@@ -1,11 +1,14 @@
+from threading import Thread
 from uuid import UUID
 
 from flask import Blueprint, request, session
 
+import almonds.crud.user as crud_user
 import almonds.services.plaid.core as plaid_core
 from almonds.crud.plaid import plaid_item as crud_plaid_item
 from almonds.crypto.cryptograph import Cryptograph
 from almonds.schemas.plaid.plaid_item import PlaidItemBase
+from almonds.services import plaid_sync
 
 plaid_bp = Blueprint("plaid", __name__)
 
@@ -37,6 +40,14 @@ def exchange_public_token():
         item_id=crypto.encrypt(resp["item_id"]),
     )
     crud_plaid_item.create_item(item)
+
+    # start a sync in the background
+    Thread(
+        target=plaid_sync.sync_user,
+        args=(crud_user.get_user_by_id(session["user_id"]),),
+        kwargs={"cryptograph": crypto},
+        daemon=True,
+    ).start()
 
     return {"public_token_exchange": "complete"}
 
