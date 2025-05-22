@@ -7,16 +7,18 @@ readme = "README.md"
 requires-python = ">=3.11"
 
 dependencies = [
-  "Flask>=3.0.3",
-  "Flask-WTF>=1.2.1",
-  "sqlalchemy>=2.0.31",
-  "pydantic>=2.10",
-  "email-validator>=2.2.0",
-  "plaid-python>=29.0.0",
-  "pandas>=2.2",
-  "plotly>=6.0",
-  "prometheus-flask-exporter>=0.23",
-  "cryptography>=44.0"
+  "Flask >=3.0.3, < 4",
+  "Flask-WTF >= 1.2.1, < 2",
+  "sqlalchemy >= 2.0.31, < 3",
+  "pydantic >= 2.10, < 3",
+  "email-validator >= 2.2.0, < 3",
+  "plaid-python >= 29.0.0, < 30",
+  "pandas >= 2.2, < 3",
+  "plotly >= 6.0, < 7",
+  "prometheus-flask-exporter >= 0.23, < 1",
+  "cryptography >= 44.0, < 45",
+  "apscheduler >= 3.11.0, < 4",
+  "pandas >= 2.2, < 3"
 ]
 
 [project.optional-dependencies]
@@ -25,6 +27,7 @@ dev = [
   "pre-commit",
   "coverage",
   "pytest-cov",
+  "rich"
 ]
 
 [tool.isort]

@@ -1,5 +1,5 @@
 from sqlalchemy.schema import Column, ForeignKey
-from sqlalchemy.types import UUID, DateTime, Integer, Numeric, String
+from sqlalchemy.types import UUID, Boolean, DateTime, Integer, Numeric, String
 
 from almonds.db.database import Base
 from almonds.models.constants import MAX_DESCRIPTION_LENGTH, MAX_DOLLAR_DIGITS
@@ -14,3 +14,5 @@ class Transaction(Base):
     amount = Column(Numeric(MAX_DOLLAR_DIGITS, 2), nullable=False)
     description = Column(String(MAX_DESCRIPTION_LENGTH))
     datetime = Column(DateTime, nullable=False)
+    pending = Column(Boolean, nullable=False)
+    item_id = Column(UUID(as_uuid=True), ForeignKey("plaid_items.id"), nullable=True)

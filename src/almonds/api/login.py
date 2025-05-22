@@ -28,6 +28,7 @@ def login():
         # Confirm login correct.
         if user := validate_login(username, password):
             store_user_session(user)
+            crud_user.mark_logged_in(user.id)
             return redirect(url_for("root.view"))
         else:
             return render_template(

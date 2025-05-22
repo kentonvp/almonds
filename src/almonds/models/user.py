@@ -18,3 +18,4 @@ class User(Base):
     email = Column(String(MAX_EMAIL_LENGTH), nullable=False)
     created_at = Column(DateTime, nullable=False)
     last_updated = Column(DateTime, nullable=False)
+    last_logged_in = Column(DateTime, nullable=False)

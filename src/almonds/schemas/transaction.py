@@ -6,10 +6,12 @@ from pydantic import BaseModel, ConfigDict
 
 class TransactionBase(BaseModel):
     user_id: UUID
-    category_id: int
+    category_id: int | None
     amount: float
     description: str
     datetime: datetime
+    pending: bool
+    item_id: UUID | None
 
 
 class Transaction(TransactionBase):

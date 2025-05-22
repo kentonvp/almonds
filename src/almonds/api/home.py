@@ -15,12 +15,12 @@ from flask import (
 import almonds.crud.budget as crud_budget
 import almonds.crud.category as crud_category
 import almonds.crud.goal as crud_goal
-import almonds.crud.plaid_item as crud_plaid_item
+import almonds.crud.plaid.plaid_item as crud_plaid_item
 import almonds.crud.transaction as crud_transaction
 import almonds.crud.user_settings as crud_user_settings
+import almonds.services.plaid.core as plaid_core
 from almonds.crypto.cryptograph import Cryptograph
 from almonds.services import charts
-from almonds.services.plaid import core
 from almonds.utils import status_code, ui
 
 root = Blueprint("root", __name__)
@@ -34,8 +34,6 @@ def view():
 
     context = build_context(
         current_page="root",
-        plaid_access_token=session.get("access_token"),
-        plaid_item_id=session.get("item_id"),
     )
 
     context |= user_context()
@@ -58,18 +56,28 @@ def settings():
     # Decrypt.
     crypto = Cryptograph()
 
-    items = crud_plaid_item.get_items_for_user(session["user_id"])
+    items = crud_plaid_item.get_active_items_for_user(session["user_id"])
     updated_items = []
     for it in items:
-        item_info = core.get_item(crypto.decrypt(it.access_token))
+        item_info = plaid_core.get_item_info(
+            session["user_id"], crypto.decrypt(it.access_token)
+        )
         updated_items.append(
-            it.model_dump() | {"institution_name": item_info["institution_name"]}
+            it.model_dump(
+                include={
+                    "id",
+                    "created_at",
+                    "synced_at",
+                }
+            )
+            | {
+                "institution_name": item_info["institution_name"],
+                "products": item_info["products"],
+            }
         )
 
-    context = build_context()
-    return render_template(
-        "settings.html", current_page="settings", plaid_items=updated_items, **context
-    )
+    context = build_context(current_page="settings", plaid_items=updated_items)
+    return render_template("settings.html", **context)
 
 
 @root.route("/plaidLogin")
@@ -130,7 +138,20 @@ def set_theme():
     data = request.get_json()
     theme = data.get("theme")
 
+    # validate theme
+    if theme not in ("light", "dark"):
+        return (
+            jsonify({"error": "Theme must be either 'light' or 'dark'."}),
+            status_code.HTTP_400_BAD_REQUEST,
+        )
+
     session["theme"] = theme
+
+    if "user_id" in session:
+        crud_user_settings.update_user_settings(
+            session["user_id"],
+            {"theme": theme},
+        )
     return (
         jsonify({"message": f"Theme set to {theme} in session."}),
         status_code.HTTP_200_OK,
@@ -159,6 +180,11 @@ def get_active_chart() -> str:
 
 
 def get_theme() -> str:
+    if "user_id" in session:
+        user_settings = crud_user_settings.get_user_settings(session["user_id"])
+        if user_settings:
+            return user_settings.get("theme", "light")
+
     return session.get("theme", "light")
 
 
@@ -235,7 +261,7 @@ def top_expenses() -> dict:
     categories = {}
     category_ids = {}
     for txn in transactions:
-        if txn.amount > 0:
+        if txn.amount > 0 or txn.category_id is None:
             continue
 
         if txn.category_id not in category_ids:

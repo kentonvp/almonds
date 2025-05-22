@@ -19,3 +19,4 @@ class User(UserUpdate):
 
     created_at: datetime
     last_updated: datetime
+    last_logged_in: datetime

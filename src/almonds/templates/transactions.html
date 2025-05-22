@@ -92,9 +92,18 @@
           </thead>
           <tbody id="transactions-body">
             {% for transaction in transactions %}
-            <tr>
+            <tr
+              {% if transaction.category_id is none %}
+                class="table-warning"
+              {% endif %}
+            >
               <td>{{ transaction.datetime | format_date }}</td>
-              <td>{{ transaction.description }}</td>
+              <td class="w-25 text-wrap text-break">
+                {{ transaction.description }}
+                {% if transaction.pending %}
+                <span title="Pending">⏳</span>
+                {% endif %}
+              </td>
               <td>{{ transaction.category }}</td>
               <td
                 class="{{ 'text-success' if transaction.amount > 0 else 'text-danger' }}"
@@ -124,35 +133,45 @@
       <!-- Pagination -->
       <nav aria-label="Transaction pagination">
         <ul class="pagination justify-content-center">
-          <li
-            class="page-item {{ 'disabled' if pagination.page_n == 1 else '' }}"
-          >
-            <a
-              class="page-link"
-              href="{{ url_for('transactions.view', page=pagination.page_n-1) if pagination.page_n > 1 else '#' }}"
-              >Previous</a
-            >
+
+          {% if pagination.total> 5 and pagination.curr > 3 %}
+          <li class="page-item">
+            <a class="page-link" href="{{ url_for('transactions.view', page=1) }}" aria-label="First">
+              <span aria-hidden="true">&laquo;&laquo;</span>
+              <span class="visually-hidden">First</span>
+            </a>
           </li>
-          {% for page in range(1, pagination.total_pages + 1) %}
-          <li
-            class="page-item {{ 'active' if page == pagination.page_n else '' }}"
-          >
-            <a
-              class="page-link"
-              href="{{ url_for('transactions.view', page=pagination.page_n) }}"
-              >{{ page }}</a
-            >
+          {% endif %}
+
+          <li class="page-item {{ 'disabled' if pagination.curr == 1 else '' }}">
+            <a class="page-link" href="{{ url_for('transactions.view', page=pagination.curr-1) if pagination.curr > 1 else '#' }}" aria-label="Previous">
+              <span aria-hidden="true">&laquo;</span>
+              <span class="visually-hidden">Previous</span>
+            </a>
+          </li>
+
+          {% for page in range(pagination.start, pagination.end + 1) %}
+          <li class="page-item {{ 'active' if page == pagination.curr else '' }}">
+            <a class="page-link" href="{{ url_for('transactions.view', page=page) }}">{{ page }}</a>
           </li>
           {% endfor %}
-          <li
-            class="page-item {{ 'disabled' if pagination.page_n == pagination.total_pages else '' }}"
-          >
-            <a
-              class="page-link"
-              href="{{ url_for('transactions.view', page=pagination.page_n+1) if pagination.page_n < pagination.total_pages else '#' }}"
-              >Next</a
-            >
+
+          <li class="page-item {{ 'disabled' if pagination.curr == pagination.total else '' }}">
+            <a class="page-link" href="{{ url_for('transactions.view', page=pagination.curr+1) if pagination.curr < pagination.total else '#' }}" aria-label="Next">
+              <span aria-hidden="true">&raquo;</span>
+              <span class="visually-hidden">Next</span>
+            </a>
           </li>
+
+          {% if pagination.total> 5 and pagination.curr < pagination.total - 2 %}
+          <li class="page-item">
+            <a class="page-link" href="{{ url_for('transactions.view', page=pagination.total) }}" aria-label="Last">
+              <span aria-hidden="true">&raquo;&raquo;</span>
+              <span class="visually-hidden">Last</span>
+            </a>
+          </li>
+          {% endif %}
+
         </ul>
       </nav>
     </div>
@@ -306,6 +325,10 @@
               <label for="edit-transaction-amount" class="form-label">Amount</label>
               <input type="number" class="form-control" id="edit-transaction-amount" name="transaction-amount" step="0.01" required>
             </div>
+            <div class="mb-3 form-check">
+              <label class="form-check-label" for="edit-transaction-pending">Pending</label>
+              <input class="form-check-input" type="checkbox" name="transaction-pending" id="edit-transaction-pending" >
+            </div>
             <div class="mb-3">
               <div class="form-check">
                 <input class="form-check-input" type="radio" name="transaction-type" id="edit-income" value="income">
@@ -358,6 +381,7 @@
             document.getElementById('edit-transaction-description').value = data.description;
             document.getElementById('edit-transaction-category').value = data.category_id;
             document.getElementById('edit-transaction-amount').value = Math.abs(data.amount);
+            document.getElementById('edit-transaction-pending').checked = data.pending;
             if (data.amount > 0) {
               document.getElementById('edit-income').checked = true;
             } else {

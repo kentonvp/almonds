@@ -28,26 +28,29 @@ def view(page: int):
     if "username" not in session:
         return redirect(url_for("root.view"))
 
+    set_page_number(page)
+
     page_transactions = crud_transaction.get_transactions_by_user(
         session["user_id"],
         limit=TRANSACTION_LIMIT,
         offset=(page - 1) * TRANSACTION_LIMIT,
     )
+
+    user_categories = crud_category.get_categories_by_user(session["user_id"])
+    categories_map = {}
+    for c in user_categories:
+        categories_map[c.id] = c.name
+
     display_transactions = [
         txn.model_dump()
-        | {"category": crud_category.get_category_by_id(txn.category_id).name}
+        | {"category": categories_map.get(txn.category_id, "Uncategorized")}
         for txn in page_transactions
     ]
 
-    total_pages = (
-        crud_transaction.count_transactions(session["user_id"]) // TRANSACTION_LIMIT + 1
-    )
-
     context = build_context()
     context |= {
-        "categories": crud_category.get_categories_by_user(session["user_id"]),
+        "categories": user_categories,
         "transactions": display_transactions,
-        "pagination": {"page_n": page, "total_pages": total_pages},
     }
     return render_template("transactions.html", **context)
 
@@ -83,14 +86,19 @@ def create_transaction():
         datetime=datetime.datetime.strptime(
             request.form["transaction-date"], "%Y-%m-%d"
         ),
+        pending=False,
+        item_id=None,
     )
 
     crud_transaction.create_transaction(transaction)
-    return redirect(url_for("transactions.view"))
+    return redirect(url_for("transactions.view", page=get_page_number()))
 
 
 @transaction_bp.route("/update", methods=["POST"])
 def update_transaction():
+    tid = UUID(request.form["transaction-id"])
+    txn = crud_transaction.get_transaction_by_id(tid)
+
     is_expense = -1 if request.form["transaction-type"] == "expense" else 1
 
     transaction = Transaction(
@@ -102,10 +110,12 @@ def update_transaction():
         datetime=datetime.datetime.strptime(
             request.form["transaction-date"], "%Y-%m-%d"
         ),
+        pending="transaction-pending" in request.form,
+        item_id=txn.item_id,
     )
 
     crud_transaction.update_transaction(transaction)
-    return redirect(url_for("transactions.view"))
+    return redirect(url_for("transactions.view", page=get_page_number()))
 
 
 @transaction_bp.route("/delete", methods=["POST"])
@@ -120,7 +130,7 @@ def delete_transaction():
 
     transaction_id = UUID(body["transaction_id"])
     crud_transaction.delete_transaction(transaction_id)
-    return redirect(url_for("transactions.view"))
+    return redirect(url_for("transactions.view", page=get_page_number()))
 
 
 @transaction_bp.route("/filter", methods=["POST"])
@@ -129,16 +139,17 @@ def filter_form():
     category = request.form["category"]
     type_ = request.form["type"]
     search = request.form["search"]
-    print(f"{recent_days=}")
-    print(f"{category=}")
-    print(f"{type_=}")
-    print(f"{search=}")
+
+    categories_map = {}
+    user_categories = crud_category.get_categories_by_user(session["user_id"])
+    for c in user_categories:
+        categories_map[c.id] = c.name
 
     # TODO: Do the filtering in SQL
     transactions = crud_transaction.get_transactions_by_user(session["user_id"])
     display_transactions = [
         txn.model_dump()
-        | {"category": crud_category.get_category_by_id(txn.category_id).name}
+        | {"category": categories_map.get(txn.category_id, "Uncategorized")}
         for txn in transactions
         if (
             txn.datetime
@@ -153,27 +164,59 @@ def filter_form():
         )
     ]
 
-    total_pages = len(display_transactions) // TRANSACTION_LIMIT + 1
-
     context = build_context()
     context |= {
-        "categories": crud_category.get_categories_by_user(session["user_id"]),
+        "categories": user_categories,
         "transactions": display_transactions,
-        "pagination": {"page_n": 1, "total_pages": total_pages},
     }
     return render_template("transactions.html", **context)
 
 
 @transaction_bp.route("/resetFilter", methods=["POST"])
 def reset_filter():
-    return redirect(url_for("transactions.view"))
+    return redirect(url_for("transactions.view", page=get_page_number()))
+
+
+def get_page_number() -> int:
+    return session.get("page_num", 1)
+
+
+def set_page_number(page: int) -> None:
+    session["page_num"] = page
+
+
+def get_pagination_page() -> dict:
+    """
+    Get the page number from the session or default to 1.
+    """
+    page = get_page_number()
+
+    total_pages = (
+        crud_transaction.count_transactions(session["user_id"]) // TRANSACTION_LIMIT + 1
+    )
+
+    start_page = max(1, page - 2)
+    end_page = min(total_pages, start_page + 4)
+
+    if end_page - start_page < 4:
+        start_page = max(1, end_page - 4)
+
+    return {
+        "pagination": {
+            "curr": page,
+            "total": total_pages,
+            "start": start_page,
+            "end": end_page,
+        }
+    }
 
 
 def build_context(**kwargs) -> dict:
-    base = home.build_context()
-    context = base | {
+    context = home.build_context()
+    context |= {
         "title": "Transactions",
         "user": {"username": session["username"]},
         "current_page": "transactions",
     }
+    context |= get_pagination_page()
     return context | kwargs

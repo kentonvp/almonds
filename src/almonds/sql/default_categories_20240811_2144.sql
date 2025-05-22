@@ -16,3 +16,5 @@ INSERT INTO categories (name) VALUES ('Household items');
 INSERT INTO categories (name) VALUES ('Subscriptions/Memberships');
 INSERT INTO categories (name) VALUES ('Paycheck');
 INSERT INTO categories (name) VALUES ('Cash');
+INSERT INTO categories (name) VALUES ('Transfer');
+INSERT INTO categories (name) VALUES ('Vacation');

@@ -10,8 +10,7 @@ from almonds.crud.user import (
     get_user_by_username,
     update_user,
 )
-from almonds.models.user import User as UserModel
-from almonds.schemas.user import User, UserBase, UserUpdate
+from almonds.schemas.user import UserBase, UserUpdate
 
 
 def test_create_user(sessionmaker_test):
