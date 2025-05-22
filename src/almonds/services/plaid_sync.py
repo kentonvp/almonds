@@ -34,7 +34,7 @@ def parse_transaction(
 
     category_id = None
     pf_cat = transaction.get("personal_finance_category")
-    if pf_cat and "HIGH" in pf_cat["confidence_level"]:
+    if pf_cat and pf_cat["confidence_level"] != "UNKNOWN":
         detailed = pf_cat["detailed"]
         category_id = PLAID_TO_ALMONDS_CATEGORY.get(detailed)
 
@@ -75,6 +75,7 @@ def added_transactions_handler(transactions: list, *, user_id: UUID, item_id: UU
         # add plaid_transaction (todo: batch like crud_transaction?)
         plaid_transaction.create_transaction(
             PlaidTransactionBase(
+                user_id=user_id,
                 account_id=txn["account_id"],
                 transaction_id=txn["transaction_id"],
             )

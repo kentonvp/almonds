@@ -4,6 +4,7 @@ from pydantic import BaseModel, ConfigDict
 
 
 class PlaidTransactionBase(BaseModel):
+    user_id: UUID
     account_id: str
     transaction_id: str
 

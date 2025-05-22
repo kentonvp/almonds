@@ -13,8 +13,7 @@ def create_transaction(
 ) -> PlaidTransaction:
     created_transaction = PlaidTransaction(
         id=uuid4(),
-        account_id=transaction.account_id,
-        transaction_id=transaction.transaction_id,
+        **transaction.model_dump(),
     )
 
     with sessionmaker() as session:
