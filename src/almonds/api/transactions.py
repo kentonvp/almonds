@@ -165,13 +165,10 @@ def filter_form():
         )
     ]
 
-    total_pages = len(display_transactions) // TRANSACTION_LIMIT + 1
-
     context = build_context()
     context |= {
         "categories": user_categories,
         "transactions": display_transactions,
-        "pagination": {"page_n": 1, "total_pages": total_pages},
     }
     return render_template("transactions.html", **context)
 
@@ -190,7 +187,21 @@ def get_pagination_page() -> dict:
     total_pages = (
         crud_transaction.count_transactions(session["user_id"]) // TRANSACTION_LIMIT + 1
     )
-    return {"pagination": {"page_n": page, "total_pages": total_pages}}
+
+    start_page = max(1, page - 2)
+    end_page = min(total_pages, start_page + 4)
+
+    if end_page - start_page < 4:
+        start_page = max(1, end_page - 4)
+
+    return {
+        "pagination": {
+            "curr": page,
+            "total": total_pages,
+            "start": start_page,
+            "end": end_page,
+        }
+    }
 
 
 def build_context(**kwargs) -> dict:

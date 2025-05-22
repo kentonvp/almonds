@@ -133,35 +133,45 @@
       <!-- Pagination -->
       <nav aria-label="Transaction pagination">
         <ul class="pagination justify-content-center">
-          <li
-            class="page-item {{ 'disabled' if pagination.page_n == 1 else '' }}"
-          >
-            <a
-              class="page-link"
-              href="{{ url_for('transactions.view', page=pagination.page_n-1) if pagination.page_n > 1 else '#' }}"
-              >Previous</a
-            >
+
+          {% if pagination.total> 5 and pagination.curr > 3 %}
+          <li class="page-item">
+            <a class="page-link" href="{{ url_for('transactions.view', page=1) }}" aria-label="First">
+              <span aria-hidden="true">&laquo;&laquo;</span>
+              <span class="visually-hidden">First</span>
+            </a>
           </li>
-          {% for page in range(1, pagination.total_pages + 1) %}
-          <li
-            class="page-item {{ 'active' if page == pagination.page_n else '' }}"
-          >
-            <a
-              class="page-link"
-              href="{{ url_for('transactions.view', page=page) }}"
-              >{{ page }}</a
-            >
+          {% endif %}
+
+          <li class="page-item {{ 'disabled' if pagination.curr == 1 else '' }}">
+            <a class="page-link" href="{{ url_for('transactions.view', page=pagination.curr-1) if pagination.curr > 1 else '#' }}" aria-label="Previous">
+              <span aria-hidden="true">&laquo;</span>
+              <span class="visually-hidden">Previous</span>
+            </a>
+          </li>
+
+          {% for page in range(pagination.start, pagination.end + 1) %}
+          <li class="page-item {{ 'active' if page == pagination.curr else '' }}">
+            <a class="page-link" href="{{ url_for('transactions.view', page=page) }}">{{ page }}</a>
           </li>
           {% endfor %}
-          <li
-            class="page-item {{ 'disabled' if pagination.page_n == pagination.total_pages else '' }}"
-          >
-            <a
-              class="page-link"
-              href="{{ url_for('transactions.view', page=pagination.page_n+1) if pagination.page_n < pagination.total_pages else '#' }}"
-              >Next</a
-            >
+
+          <li class="page-item {{ 'disabled' if pagination.curr == pagination.total else '' }}">
+            <a class="page-link" href="{{ url_for('transactions.view', page=pagination.curr+1) if pagination.curr < pagination.total else '#' }}" aria-label="Next">
+              <span aria-hidden="true">&raquo;</span>
+              <span class="visually-hidden">Next</span>
+            </a>
           </li>
+
+          {% if pagination.total> 5 and pagination.curr < pagination.total - 2 %}
+          <li class="page-item">
+            <a class="page-link" href="{{ url_for('transactions.view', page=pagination.total) }}" aria-label="Last">
+              <span aria-hidden="true">&raquo;&raquo;</span>
+              <span class="visually-hidden">Last</span>
+            </a>
+          </li>
+          {% endif %}
+
         </ul>
       </nav>
     </div>
